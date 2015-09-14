@@ -6,7 +6,7 @@
   "type": "project",
   "require": {
     "php": ">=5.5.9",
-    "guzzlehttp/guzzle":"~5.0",
+    "guzzlehttp/guzzle":"~6.0",
     "commerceguys/guzzle-oauth2-plugin":"~2.1",
     "illuminate/support": "~5.1",
     "illuminate/database": "~5.1"
