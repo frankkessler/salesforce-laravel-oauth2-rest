@@ -1,0 +1,26 @@
+{
+  "name": "frankkessler/salesforce-laravel-oauth2-rest",
+  "description": "A Salesforce REST api wrapper utilizing oAuth2",
+  "keywords": ["salesforce", "rest", "oauth2"],
+  "license": "MIT",
+  "type": "project",
+  "require": {
+    "php": ">=5.5.9",
+    "guzzlehttp/guzzle":"~5.0",
+    "commerceguys/guzzle-oauth2-plugin":"~2.1",
+    "illuminate/support": "~5.1",
+    "illuminate/database": "~5.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.0",
+    "phpspec/phpspec": "~2.1"
+  },
+  "autoload": {
+    "classmap": [
+      "src/Controllers"
+    ],
+    "psr-4": {
+      "Frankkessler\\Salesforce\\": "src"
+    }
+  }
+}
