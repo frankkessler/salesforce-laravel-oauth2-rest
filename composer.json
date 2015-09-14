@@ -4,6 +4,8 @@
   "keywords": ["salesforce", "rest", "oauth2"],
   "license": "MIT",
   "type": "project",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "require": {
     "php": ">=5.5.9",
     "guzzlehttp/guzzle":"~6.0",
