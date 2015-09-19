@@ -4,12 +4,16 @@ return [
     'api' => [
         'domain' => env('SALESFORCE_API_DOMAIN','na1.salesforce.com'),
 
-        'api_base_uri' => env('SALESFORCE_API_BASE_URI', '/services/data/v34.0/sobjects'),
+        'base_uri' => env('SALESFORCE_API_BASE_URI', '/services/data/v34.0/sobjects'),
     ],
     'oauth' => [
         'domain' => env('SALESFORCE_OAUTH_DOMAIN','login.salesforce.com'),
 
-        'callback_url' => env('SALESFORCE_OAUTH_CALLBACK_URL','/salesforce/callback'),
+        'authorize_uri' => env('SALESFORCE_OAUTH_AUTHORIZE_URI','/services/oauth2/authorize'),
+
+        'token_uri' => env('SALESFORCE_OAUTH_TOKEN_URI','/services/oauth2/token'),
+
+        'callback_url' => env('SALESFORCE_OAUTH_CALLBACK_URL','https://condor.progyny.tech/salesforce/admin/callback'),
 
         'consumer_token' => env('SALESFORCE_OAUTH_CONSUMER_TOKEN',null),
 
@@ -21,4 +25,6 @@ return [
             'refresh_token',
         ]
     ],
+    'storage_type' => 'eloquent',
+    'storage_user_id' => null,
 ];

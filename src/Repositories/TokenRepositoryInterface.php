@@ -2,10 +2,20 @@
 
 namespace Frankkessler\Salesforce\Repositories;
 
-interface TokenRepositoryInterface {
+use CommerceGuys\Guzzle\Oauth2\AccessToken;
 
-    public function getRefreshTokenById($user_id);
+interface TokenRepositoryInterface
+{
+    public function getAccessToken($user_id=null);
 
-    public function setRefreshTokenById($user_id, $refresh_token);
+    public function getRefreshToken($user_id=null);
+
+    public function setAccessToken($access_token, $user_id=null);
+
+    public function setRefreshToken($refresh_token, $user_id=null);
+
+    public function getTokenRecord($user_id=null);
+
+    public function setTokenRecord(AccessToken $token, $user_id=null);
 
 }

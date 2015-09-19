@@ -1,6 +1,6 @@
 <?php
 
-namespace Chrisbjr\ApiGuard\Providers;
+namespace Frankkessler\Salesforce\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +15,7 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
     {
         // Publish your migrations
         $this->publishes([
-            __DIR__ . '/../../database/migrations/salesforce.php' => base_path('/database/migrations/'.date('Y_m_d_His').'_create_salesforce_tokens_table.php')
+            __DIR__ . '/../../migrations/salesforce.php' => base_path('/database/migrations/'.date('Y_m_d_His').'_create_salesforce_tokens_table.php')
         ], 'migrations');
 
         //publish config
@@ -30,15 +30,8 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'salesforce');
 
         //set custom routes for admin pages
-        if (! $this->app->routesAreCached()) {
-            require __DIR__.'/../../../app/Http/routes.php';
-            Route::get('salesforce/token',function(){
-
-            });
-            Route::group(['middleware' => 'auth'], function () {
-                Route::get('salesforce_login', 'Frankkessler\Salesforce\SalesforceController@login_form');
-                Route::post('salesforce_login', 'Frankkessler\Salesforce\SalesforceController@login_form_submit');
-            });
+       if (! $this->app->routesAreCached()) {
+            require __DIR__.'/../../http/routes.php';
         }
     }
     /**
