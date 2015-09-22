@@ -33,14 +33,64 @@ class Salesforce{
             'auth_location' => 'body',
         ];
         $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
-var_dump($this->oauth2Client->getAccessToken());
     }
 
     public function getObject($id, $type){
-        $url = 'https://'.Config::get('salesforce.api.domain').Config::get('salesforce.api.base_uri').'/'.$type.'/'.$id;
-        var_dump($url);
-        try {
-            $response = $this->oauth2Client->get($url, ['http_errors' => false]);
+        return $this->call_api('get','sobjects/'.$type.'/'.$id);
+    }
+
+    public function createObject($type, $data){
+        $result = $this->call_api('post','sobjects/'.$type, [
+            'http_errors' => false,
+            'body' => json_encode($data),
+            'headers' => [
+                'Content-type' => 'application/json',
+            ]
+        ]);
+
+        if($result && isset($result['success']) &&  $result['success']){
+            return (isset($result['id']))?$result['id']:null;
+        }
+    }
+
+    public function updateObject($id, $type, $data){
+        if(!$id && isset($data['id'])){
+            $id = $data['id'];
+            unset($data['id']);
+        }elseif(isset($data['id'])){
+            unset($data['id']);
+        }
+
+        if(!$id || !$type || !$data){
+            return [];
+        }
+
+        return $this->call_api('patch', 'sobjects/'.$type.'/'.$id, [
+            'http_errors' => false,
+            'body' => json_encode($data),
+            'headers' => [
+                'Content-type' => 'application/json',
+            ]
+        ]);
+    }
+
+    public function deleteObject($id, $type){
+        if(!$type || !$id) {
+            return [];
+        }
+        return $this->call_api('delete', 'sobjects/'. $type . '/' . $id);
+    }
+
+    protected function call_api($method, $url, $options=[]){
+        try{
+            if(is_null($options)){
+                $options = [];
+            }
+
+            $options['http_errors'] = false;
+
+            $response = $this->oauth2Client->{$method}($url, $options);
+
             if($data = json_decode((string)$response->getBody(), true)){
                 $this->updateAccessToken($this->oauth2Client->getAccessToken()->getToken());
                 return $data;
@@ -49,14 +99,6 @@ var_dump($this->oauth2Client->getAccessToken());
 
         }
         return [];
-    }
-
-    public function putObject($data){
-
-    }
-
-    public function postObject($id, $data){
-
     }
     protected function updateAccessToken($current_access_token){
         if($current_access_token != $this->token_record->access_token) {

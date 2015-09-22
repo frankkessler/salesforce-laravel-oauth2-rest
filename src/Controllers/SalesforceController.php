@@ -38,7 +38,6 @@ class SalesforceController extends BaseController
         ];
 
         return '<a href="'.Utilities::getAuthorizationUrl($service_authorization_url, $oauth_config).'">Login to Salesforce</a>';
-        //return view('salesforce::salesforce_login');
     }
 
     public function process_authorization_callback(Request $request){
@@ -73,27 +72,11 @@ class SalesforceController extends BaseController
             $oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_config));
         }
 
-        var_dump('BEFORE_ACCESS_TOKEN');
         $access_token = $oauth2Client->getAccessToken();
-        var_dump('AFTER_ACCESS_TOKEN');
-        var_dump($access_token->getToken());
-        var_dump($access_token->getRefreshToken()->getToken());
+
         $repository->store->setTokenRecord($access_token);
-        //$repository->store->setAccessToken($access_token->getToken());
-        //$repository->store->setRefreshToken($access_token->getRefreshToken()->getToken());
 
-        $refresh_token = $oauth2Client->getRefreshToken();
-        //var_dump($refresh_token->);
-
-        $sf = new Salesforce();
-        $account = $sf->getObject('001e000000fhzpb','Account');
-        var_dump($account);
-
+        return 'Token record set successfully';
     }
 
-    public function test_account(){
-        $sf = new Salesforce();
-        $account = $sf->getObject('001e000000fhzpb','Account');
-        var_dump($account);
-    }
 }
