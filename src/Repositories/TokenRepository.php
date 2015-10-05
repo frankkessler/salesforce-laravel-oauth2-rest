@@ -2,14 +2,14 @@
 
 namespace Frankkessler\Salesforce\Repositories;
 
-use Config;
+use Frankkessler\Salesforce\SalesforceConfig;
 use Frankkessler\Salesforce\Repositories\Eloquent\TokenEloquentRepository;
 
 class TokenRepository
 {
     function __construct($config=[])
     {
-        $this->store = $this->setStore();
+        $this->store = $this->setStore($config);
     }
 
     /**
@@ -19,7 +19,7 @@ class TokenRepository
 
     function setStore($config=[])
     {
-        $store_name = Config::get('salesforce.storage_type');
+        $store_name = SalesforceConfig::get('salesforce.storage_type');
         return $this->{'create' . ucfirst($store_name) . 'Driver'}($config);
     }
 

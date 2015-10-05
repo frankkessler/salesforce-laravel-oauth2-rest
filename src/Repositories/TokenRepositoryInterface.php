@@ -6,9 +6,6 @@ use CommerceGuys\Guzzle\Oauth2\AccessToken;
 
 interface TokenRepositoryInterface
 {
-    public function getAccessToken($user_id=null);
-
-    public function getRefreshToken($user_id=null);
 
     public function setAccessToken($access_token, $user_id=null);
 

@@ -10,13 +10,8 @@ use Config;
 
 class TokenEloquentRepository implements TokenRepositoryInterface{
 
-    public function getAccessToken($user_id=null){
-        $record = $this->getTokenRecord($user_id);
-        return SalesforceToken::findByUserId($user_id)->first();
-    }
-    public function getRefreshToken($user_id=null){
-        $record = $this->getTokenRecord($user_id);
-        return SalesforceToken::findByUserId($user_id)->first();
+    public function  __construct($config=[]){
+
     }
 
     public function setAccessToken($access_token, $user_id=null){
