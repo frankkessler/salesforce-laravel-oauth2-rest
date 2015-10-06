@@ -20,14 +20,14 @@ class SalesforceController extends BaseController
      */
     public function login_form()
     {
-        Authentication::returnAuthorizationLink();
+        return Authentication::returnAuthorizationLink();
     }
 
     public function process_authorization_callback(Request $request){
         if (!$request->has('code')){
             die;
         }
-        Authentication::processAuthenicationCode($request->input('code'));
+        return Authentication::processAuthenicationCode($request->input('code'));
     }
 
    /* public function test_account(){
