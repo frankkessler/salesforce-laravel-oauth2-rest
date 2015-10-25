@@ -3,6 +3,7 @@
 namespace Frankkessler\Salesforce\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Frankkessler\Salesforce\SalesforceConfig;
 
 class SalesforceLaravelServiceProvider extends ServiceProvider{
 
@@ -30,8 +31,10 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'salesforce');
 
         //set custom routes for admin pages
-       if (! $this->app->routesAreCached()) {
-            require __DIR__.'/../../http/routes.php';
+        if(SalesforceConfig::get('salesforce.enable_oauth_routes')) {
+            if (!$this->app->routesAreCached()) {
+                require __DIR__ . '/../../http/routes.php';
+            }
         }
     }
     /**

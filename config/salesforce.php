@@ -27,4 +27,5 @@ return [
     ],
     'storage_type' => 'eloquent',
     'storage_global_user_id' => null,
+    'enable_oauth_routes' =>  env('SALESFORCE_ENABLE_OAUTH_ROUTES',false),
 ];
