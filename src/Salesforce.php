@@ -143,15 +143,21 @@ class Salesforce{
             }elseif($response_code == 400){
                 $data = json_decode((string)$response->getBody(), true);
                 $data = current($data);
-                $data['success'] = false;
-            }else{
-                $info = json_decode((string)$response->getBody(), true);
-                if(!$info){
-                    $info['message'] = (string)$response->getBody();
+                if(!$data){
+                    $data['message_string'] = (string)$response->getBody();
                 }
-                $info['http_status'] = $response_code;
+                $data['http_status'] = $response_code;
                 $data['success'] = false;
-                $data['error'] = array_merge($debug_info,$info);
+                $data = array_merge($debug_info,$data);
+
+            }else{
+                $data = json_decode((string)$response->getBody(), true);
+                if(!$data){
+                    $data['message_string'] = (string)$response->getBody();
+                }
+                $data['http_status'] = $response_code;
+                $data['success'] = false;
+                $data = array_merge($debug_info,$data);
             }
 
 
