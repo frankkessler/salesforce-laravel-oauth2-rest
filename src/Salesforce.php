@@ -96,9 +96,16 @@ class Salesforce{
         return $result;
     }
 
-    public function query($query){
+    public function query($query)
+    {
         return $this->call_api('get','query/?q='.urlencode($query));
     }
+
+    public function search($query)
+    {
+        return $this->call_api('get','search/?q='.urlencode($query));
+    }
+
     public function rawGetRequest($request_string){
         return $this->call_api('get',$request_string);
     }
