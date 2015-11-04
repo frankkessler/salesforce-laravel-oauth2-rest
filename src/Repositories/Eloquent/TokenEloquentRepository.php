@@ -30,7 +30,8 @@ class TokenEloquentRepository implements TokenRepositoryInterface{
 
     public function getTokenRecord($user_id=null){
         if(is_null($user_id)){
-            if(!$user_id = Config::get('salesforce.storage_global_user_id')){
+            $user_id = Config::get('salesforce.storage_global_user_id');
+            if(is_null($user_id)){
                 $user = Auth::user();
                 if($user){
                     $user_id = $user->id;
@@ -51,7 +52,8 @@ class TokenEloquentRepository implements TokenRepositoryInterface{
 
     public function setTokenRecord(AccessToken $token, $user_id=null){
         if(is_null($user_id)){
-            if(!$user_id = Config::get('salesforce.storage_global_user_id')){
+            $user_id = Config::get('salesforce.storage_global_user_id');
+            if(is_null($user_id)){
                 $user = Auth::user();
                 if($user){
                     $user_id = $user->id;
