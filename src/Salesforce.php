@@ -101,6 +101,11 @@ class Salesforce{
         return $this->call_api('get','query/?q='.urlencode($query));
     }
 
+    public function queryAll($query)
+    {
+        return $this->call_api('get','queryAll/?q='.urlencode($query));
+    }
+
     public function search($query)
     {
         return $this->call_api('get','search/?q='.urlencode($query));
