@@ -29,12 +29,4 @@ class SalesforceController extends BaseController
         }
         return Authentication::processAuthenicationCode($request->input('code'));
     }
-
-   /* public function test_account(){
-        $sf = new Salesforce();
-        $account = $sf->getObject('001e000000fhzpb','Account');
-        //$account = $sf->getObject('00Qe0000006a8x9','Lead');
-
-        var_dump($account);
-    }*/
 }

@@ -13,7 +13,7 @@ return [
 
         'token_uri' => env('SALESFORCE_OAUTH_TOKEN_URI','/services/oauth2/token'),
 
-        'callback_url' => env('SALESFORCE_OAUTH_CALLBACK_URL','https://condor.progyny.tech/salesforce/admin/callback'),
+        'callback_url' => env('SALESFORCE_OAUTH_CALLBACK_URL',''),
 
         'consumer_token' => env('SALESFORCE_OAUTH_CONSUMER_TOKEN',null),
 
