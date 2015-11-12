@@ -101,9 +101,39 @@ class Salesforce{
         return $this->call_api('get','query/?q='.urlencode($query));
     }
 
+    public function queryFollowNext($query)
+    {
+        return $this->_queryFollowNext('query', $query);
+    }
+
     public function queryAll($query)
     {
         return $this->call_api('get','queryAll/?q='.urlencode($query));
+    }
+
+    public function queryAllFollowNext($query){
+        return $this->_queryFollowNext('queryAll', $query);
+    }
+
+    protected function _queryFollowNext($query_type, $query, $url=null)
+    {
+        //next url has not been supplied
+        if(is_null($url)) {
+            $result = $this->call_api('get', $query_type.'/?q=' . urlencode($query));
+        }else {
+            $result = $this->rawGetRequest($url);
+        }
+
+        if($result && isset($result['records']) && $result['records']){
+            if(isset($result['nextRecordsUrl']) && $result['nextRecordsUrl']) {
+                $new_result = $this->_queryFollowNext($query_type, $query, $result['nextRecordsUrl']);
+                if($new_result && isset($new_result['records'])){
+                    $result['records'] = array_merge($result['records'],$new_result['records']);
+                }
+            }
+        }
+
+        return $result;
     }
 
     public function search($query)
