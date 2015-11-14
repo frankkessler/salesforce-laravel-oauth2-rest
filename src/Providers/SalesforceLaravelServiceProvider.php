@@ -16,7 +16,7 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
     {
         // Publish your migrations
         $this->publishes([
-            __DIR__ . '/../../migrations/salesforce.php' => base_path('/database/migrations/'.date('Y_m_d_His').'_create_salesforce_tokens_table.php')
+            __DIR__ . '/../../migrations/salesforce.php' => base_path('/database/migrations/2015_09_18_141101_create_salesforce_tokens_table.php')
         ], 'migrations');
 
         //publish config
