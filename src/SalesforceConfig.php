@@ -7,28 +7,40 @@ class SalesforceConfig{
 
     private static $config;
 
-    public function __construct($config=[]){
-        if($config && !empty($config)){
-            self::$config = $config;
-        }
-    }
-
-    public static function get($key){
-        if(isset(self::$config[$key])){
+    public static function get($key=null)
+    {
+        if(is_null($key)){
+            return self::$config;
+        }elseif(isset(self::$config[$key])){
             return self::$config[$key];
-        }else{
-            if(class_exists('Config')){
-                return Config::get($key);
-            }
         }
         return '';
     }
 
-    public static function set($key, $value){
+    public static function set($key, $value)
+    {
         self::$config[$key] = $value;
     }
 
-    public static function setAll($config){
+    public static function setAll($config)
+    {
         self::$config = $config;
+    }
+
+    public static function setInitialConfig($config=[])
+    {
+        if(is_null(self::$config)) {
+            self::$config = self::getInitialConfig();
+            if ($config && !empty($config && is_array($config))) {
+                self::$config = array_replace(self::$config, $config);
+            }
+        }
+    }
+
+    protected static function getInitialConfig()
+    {
+        $config = Config::get('salesforce');
+        $config = ['salesforce'=>$config];
+        return array_dot($config);
     }
 }

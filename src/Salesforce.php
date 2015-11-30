@@ -12,10 +12,10 @@ use Frankkessler\Salesforce\Repositories\TokenRepository;
 
 
 class Salesforce{
-    public function __construct($config=null){
-        if($config){
-            SalesforceConfig::setAll($config);
-        }
+    public function __construct($config=null)
+    {
+        SalesforceConfig::setInitialConfig($config);
+
         $this->repository = new TokenRepository;
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
@@ -25,14 +25,22 @@ class Salesforce{
             'auth' => 'oauth2',
         ]);
 
-        $this->token_record = $this->repository->store->getTokenRecord();
+        if(!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')){
+            $this->token_record = $this->repository->store->getTokenRecord();
+            SalesforceConfig::set('salesforce.oauth.access_token',$this->token_record->access_token);
+            SalesforceConfig::set('salesforce.oauth.refresh_token',$this->token_record->refresh_token);
 
-        $this->oauth2Client->setAccessToken($this->token_record->access_token, $access_token_type='Bearer');
-        $this->oauth2Client->setRefreshToken($this->token_record->refresh_token, $refresh_token_type='refresh_token');
+        }
+
+        $access_token = SalesforceConfig::get('salesforce.oauth.access_token');
+        $refresh_token = SalesforceConfig::get('salesforce.oauth.refresh_token');
+
+        $this->oauth2Client->setAccessToken($access_token, $access_token_type='Bearer');
+        $this->oauth2Client->setRefreshToken($refresh_token, $refresh_token_type='refresh_token');
         $refresh_token_config = [
             'client_id' => SalesforceConfig::get('salesforce.oauth.consumer_token'),
             'client_secret' => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
-            'refresh_token' => $this->token_record->refresh_token,
+            'refresh_token' => $refresh_token,
             'token_url' =>'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri'),
             'auth_location' => 'body',
         ];
@@ -213,8 +221,9 @@ class Salesforce{
         return [];
     }
     protected function updateAccessToken($current_access_token){
-        if($current_access_token != $this->token_record->access_token) {
+        if($current_access_token != SalesforceConfig::get('salesforce.oauth.access_token')) {
             $this->repository->store->setAccessToken($current_access_token);
+            SalesforceConfig::set('salesforce.oauth.access_token', $current_access_token);
         }
     }
 }
