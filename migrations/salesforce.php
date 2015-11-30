@@ -12,16 +12,18 @@ class CreateSalesforceTokensTable extends Migration
      */
     public function up()
     {
-        Schema::create('salesforce_tokens', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('access_token');
-            $table->string('refresh_token');
-            $table->string('instance_base_url');
-            $table->bigInteger('user_id');
-            $table->datetime('expires')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('salesforce_tokens')) {
+            Schema::create('salesforce_tokens', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->string('access_token');
+                $table->string('refresh_token');
+                $table->string('instance_base_url');
+                $table->bigInteger('user_id');
+                $table->datetime('expires')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**
@@ -31,6 +33,6 @@ class CreateSalesforceTokensTable extends Migration
      */
     public function down()
     {
-        Schema::drop('salesforce_tokens');
+
     }
 }
