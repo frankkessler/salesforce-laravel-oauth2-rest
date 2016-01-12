@@ -9,6 +9,10 @@ class SalesforceConfig{
 
     public static function get($key=null)
     {
+        if(!self::$config){
+            self::$config = self::getInitialConfig();
+        }
+
         if(is_null($key)){
             return self::$config;
         }elseif(isset(self::$config[$key])){
@@ -19,6 +23,9 @@ class SalesforceConfig{
 
     public static function set($key, $value)
     {
+        if(!self::$config){
+            self::$config = self::getInitialConfig();
+        }
         self::$config[$key] = $value;
     }
 
@@ -29,7 +36,7 @@ class SalesforceConfig{
 
     public static function setInitialConfig($config=[])
     {
-        if(is_null(self::$config)) {
+        if(!self::$config) {
             self::$config = self::getInitialConfig();
             if ($config && !empty($config && is_array($config))) {
                 self::$config = array_replace(self::$config, $config);
