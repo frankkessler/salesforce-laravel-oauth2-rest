@@ -38,9 +38,10 @@ class SalesforceConfig{
     {
         if(!self::$config) {
             self::$config = self::getInitialConfig();
-            if ($config && !empty($config && is_array($config))) {
-                self::$config = array_replace(self::$config, $config);
-            }
+        }
+
+        if ($config && !empty($config) && is_array($config)) {
+            self::$config = array_replace(self::$config, $config);
         }
     }
 
