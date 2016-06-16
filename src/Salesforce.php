@@ -7,7 +7,7 @@ use CommerceGuys\Guzzle\Oauth2\GrantType\AuthorizationCode;
 use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Oauth2\Utilities;
 use Frankkessler\Salesforce\Repositories\TokenRepository;
-
+use Exception;
 
 
 
@@ -166,7 +166,7 @@ class Salesforce{
             $options['http_errors'] = false;
 
             $response = $this->oauth2Client->{$method}($url, $options);
-            //var_dump((string)$response->getBody());
+
             $response_code = $response->getStatusCode();
             if($response_code == 200) {
                 $data = json_decode((string)$response->getBody(), true);
@@ -193,7 +193,9 @@ class Salesforce{
             }elseif($response_code == 400){
                 $data = json_decode((string)$response->getBody(), true);
                 $data = current($data);
-                if(!$data){
+                if($data && isset($data['message'])){
+                    $data['message_string'] = $data['message'];
+                }elseif(!$data){
                     $data['message_string'] = (string)$response->getBody();
                 }
                 $data['http_status'] = $response_code;
@@ -202,7 +204,10 @@ class Salesforce{
 
             }else{
                 $data = json_decode((string)$response->getBody(), true);
-                if(!$data){
+                $data = current($data);
+                if($data && isset($data['message'])){
+                    $data['message_string'] = $data['message'];
+                }elseif(!$data){
                     $data['message_string'] = (string)$response->getBody();
                 }
                 $data['http_status'] = $response_code;
@@ -215,7 +220,7 @@ class Salesforce{
                 $this->updateAccessToken($this->oauth2Client->getAccessToken()->getToken());
                 return $data;
             }
-        }catch(ClientException $e){
+        }catch(Exception $e){
 
         }
         return [];
