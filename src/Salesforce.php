@@ -221,7 +221,12 @@ class Salesforce{
                 return $data;
             }
         }catch(Exception $e){
-
+            $data['message_string'] = $e->getMessage();
+            $data['file'] = $e->getFile().':'.$e->getLine();
+            $data['http_status'] = 500;
+            $data['success'] = false;
+            $data = array_merge($debug_info,$data);
+            return $data;
         }
         return [];
     }
