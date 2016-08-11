@@ -149,8 +149,30 @@ class Salesforce{
         return $this->call_api('get','search/?q='.urlencode($query));
     }
 
+    public function getCustomRest($uri)
+    {
+        $url = 'https://'.SalesforceConfig::get('salesforce.api.domain').'/services/apexrest/'.$uri;
+        return $this->rawgetRequest($url);
+    }
+
+    public function postCustomRest($uri, $data)
+    {
+        $url = 'https://'.SalesforceConfig::get('salesforce.api.domain').'/services/apexrest/'.$uri;
+        return $this->rawPostRequest($url, $data);
+    }
+
     public function rawGetRequest($request_string){
         return $this->call_api('get',$request_string);
+    }
+
+    public function rawPostRequest($request_string, $data){
+        return $this->call_api('post',$request_string,[
+            'http_errors' => false,
+            'body' => json_encode($data),
+            'headers' => [
+                'Content-type' => 'application/json',
+            ],
+        ]);
     }
 
     protected function call_api($method, $url, $options=[], $debug_info=[]){
