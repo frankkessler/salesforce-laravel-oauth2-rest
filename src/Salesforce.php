@@ -25,10 +25,10 @@ class Salesforce
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
 
-        if(!$this->oauth2Client) {
+        if (!$this->oauth2Client) {
             $this->oauth2Client = new Oauth2Client([
                 'base_uri' => $base_uri,
-                'auth' => 'oauth2',
+                'auth'     => 'oauth2',
             ]);
         }
 
@@ -56,24 +56,26 @@ class Salesforce
     }
 
     /**
-     * Get full sObject
+     * Get full sObject.
+     *
      * @param $id
      * @param $type
+     *
      * @return array|mixed
      */
-
     public function getObject($id, $type)
     {
         return $this->call_api('get', 'sobjects/'.$type.'/'.$id);
     }
 
     /**
-     * Create sObject
+     * Create sObject.
+     *
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return array|mixed
      */
-
     public function createObject($type, $data)
     {
         return $this->call_api('post', 'sobjects/'.$type, [
@@ -86,13 +88,14 @@ class Salesforce
     }
 
     /**
-     * Update sObject
+     * Update sObject.
+     *
      * @param string $id
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return array|mixed
      */
-
     public function updateObject($id, $type, $data)
     {
         if (!$id && isset($data['id'])) {
@@ -220,7 +223,7 @@ class Salesforce
 
     public function bulk()
     {
-        if(!$this->bulk_api){
+        if (!$this->bulk_api) {
             $this->bulk_api = new Bulk($this->config);
         }
 
@@ -243,17 +246,17 @@ class Salesforce
             $response_code = $response->getStatusCode();
 
             $data = [
-                'operation' => '',
-                'success' => false,
+                'operation'      => '',
+                'success'        => false,
                 'message_string' => '',
-                'http_status' => 500,
+                'http_status'    => 500,
 
             ];
 
             if ($response_code == 200) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
 
                 $data['operation'] = 'create';
 
