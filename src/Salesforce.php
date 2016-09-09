@@ -9,19 +9,30 @@ use Frankkessler\Salesforce\Repositories\TokenRepository;
 
 class Salesforce
 {
+    public $oauth2Client;
+
+    protected $config;
+
+    private $bulk_api;
+
     public function __construct($config = null)
     {
+        $this->config = $config;
+        //Allow custom config to be applied through the constructor
         SalesforceConfig::setInitialConfig($config);
 
         $this->repository = new TokenRepository();
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
 
-        $this->oauth2Client = new Oauth2Client([
-            'base_uri' => $base_uri,
-            'auth'     => 'oauth2',
-        ]);
+        if(!$this->oauth2Client) {
+            $this->oauth2Client = new Oauth2Client([
+                'base_uri' => $base_uri,
+                'auth' => 'oauth2',
+            ]);
+        }
 
+        //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
         if (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')) {
             $this->token_record = $this->repository->store->getTokenRecord();
             SalesforceConfig::set('salesforce.oauth.access_token', $this->token_record->access_token);
@@ -31,8 +42,9 @@ class Salesforce
         $access_token = SalesforceConfig::get('salesforce.oauth.access_token');
         $refresh_token = SalesforceConfig::get('salesforce.oauth.refresh_token');
 
+        //Set access token and refresh token in Guzzle oauth client
         $this->oauth2Client->setAccessToken($access_token, $access_token_type = 'Bearer');
-        $this->oauth2Client->setRefreshToken($refresh_token, $refresh_token_type = 'refresh_token');
+        $this->oauth2Client->setRefreshToken($refresh_token);
         $refresh_token_config = [
             'client_id'     => SalesforceConfig::get('salesforce.oauth.consumer_token'),
             'client_secret' => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
@@ -43,10 +55,24 @@ class Salesforce
         $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
     }
 
+    /**
+     * Get full sObject
+     * @param $id
+     * @param $type
+     * @return array|mixed
+     */
+
     public function getObject($id, $type)
     {
         return $this->call_api('get', 'sobjects/'.$type.'/'.$id);
     }
+
+    /**
+     * Create sObject
+     * @param string $type
+     * @param array $data
+     * @return array|mixed
+     */
 
     public function createObject($type, $data)
     {
@@ -58,6 +84,14 @@ class Salesforce
             ],
         ]);
     }
+
+    /**
+     * Update sObject
+     * @param string $id
+     * @param string $type
+     * @param array $data
+     * @return array|mixed
+     */
 
     public function updateObject($id, $type, $data)
     {
@@ -184,6 +218,15 @@ class Salesforce
         ]);
     }
 
+    public function bulk()
+    {
+        if(!$this->bulk_api){
+            $this->bulk_api = new Bulk($this->config);
+        }
+
+        return $this->bulk_api;
+    }
+
     protected function call_api($method, $url, $options = [], $debug_info = [])
     {
         try {
@@ -191,57 +234,58 @@ class Salesforce
                 $options = [];
             }
 
-            if (isset($options['body'])) {
-                // var_dump($options['body']);
-            }
-
             $options['http_errors'] = false;
 
             $response = $this->oauth2Client->{$method}($url, $options);
 
+            /* @var $response \GuzzleHttp\Psr7\Response */
+
             $response_code = $response->getStatusCode();
+
+            $data = [
+                'operation' => '',
+                'success' => false,
+                'message_string' => '',
+                'http_status' => 500,
+
+            ];
+
             if ($response_code == 200) {
-                $data = json_decode((string) $response->getBody(), true);
+                $data = array_replace($data,json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
-                $data = json_decode((string) $response->getBody(), true);
+                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+
                 $data['operation'] = 'create';
+
                 if (isset($data['id'])) {
                     $data['Id'] = $data['id'];
                 }
                 unset($data['id']);
             } elseif ($response_code == 204) {
                 if (strtolower($method) == 'delete') {
-                    $data = [
+                    $data = array_merge($data, [
                         'success'   => true,
                         'operation' => 'delete',
-                    ];
+                    ]);
                 } else {
-                    $data = [
+                    $data = array_merge($data, [
                         'success'   => true,
                         'operation' => 'update',
-                    ];
+                    ]);
                 }
-            } elseif ($response_code == 400) {
-                $data = json_decode((string) $response->getBody(), true);
-                $data = current($data);
-                if ($data && isset($data['message'])) {
-                    $data['message_string'] = $data['message'];
-                } elseif (!$data) {
-                    $data['message_string'] = (string) $response->getBody();
-                }
-                $data['http_status'] = $response_code;
-                $data['success'] = false;
-                $data = array_merge($debug_info, $data);
             } else {
-                $data = json_decode((string) $response->getBody(), true);
-                $data = current($data);
+                $full_data = json_decode((string) $response->getBody(), true);
+                $data = array_merge($data, current($full_data));
+
                 if ($data && isset($data['message'])) {
                     $data['message_string'] = $data['message'];
                 } elseif (!$data) {
                     $data['message_string'] = (string) $response->getBody();
                 }
+
                 $data['http_status'] = $response_code;
                 $data['success'] = false;
+
                 $data = array_merge($debug_info, $data);
             }
 

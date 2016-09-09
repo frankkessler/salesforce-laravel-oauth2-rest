@@ -29,6 +29,9 @@
     ],
     "psr-4": {
       "Frankkessler\\Salesforce\\": "src"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   }
 }
