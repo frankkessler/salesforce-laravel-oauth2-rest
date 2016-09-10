@@ -3,7 +3,6 @@
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
 
 class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
 {
@@ -17,14 +16,14 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
-        $job = $salesforce->bulk()->createJob('insert','Account');
+        $job = $salesforce->bulk()->createJob('insert', 'Account');
 
-        $this->assertEquals("750D00000004SkVIAU", $job->id);
+        $this->assertEquals('750D00000004SkVIAU', $job->id);
     }
 
     public function testBulkJobDetails()
@@ -37,17 +36,17 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
-        $jobId = "750D00000004SkVIAU";
+        $jobId = '750D00000004SkVIAU';
 
         $job = $salesforce->bulk()->jobDetails($jobId);
 
         $this->assertEquals($jobId, $job->id);
-        $this->assertEquals("Closed", $job->state);
+        $this->assertEquals('Closed', $job->state);
     }
 
     public function testBulkBatchCreate()
@@ -60,16 +59,16 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
-        $jobId = "750D00000004SkVIAU";
+        $jobId = '750D00000004SkVIAU';
 
-        $batch = $salesforce->bulk()->addBatch($jobId,$this->dataArray());
+        $batch = $salesforce->bulk()->addBatch($jobId, $this->dataArray());
 
-        $this->assertEquals("750D00000004SkGIAU", $batch->id);
+        $this->assertEquals('750D00000004SkGIAU', $batch->id);
         $this->assertEquals($jobId, $batch->jobId);
     }
 
@@ -83,18 +82,18 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
-        $jobId = "750D00000004SkVIAU";
-        $batchId = "750D00000004SkGIAU";
+        $jobId = '750D00000004SkVIAU';
+        $batchId = '750D00000004SkGIAU';
 
         $batch = $salesforce->bulk()->batchDetails($jobId, $batchId);
 
         $this->assertEquals($batchId, $batch->id);
-        $this->assertEquals("Completed", $batch->state);
+        $this->assertEquals('Completed', $batch->state);
     }
 
     public function testRunBatch()
@@ -111,30 +110,30 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
-        $jobId = "750D00000004SkVIAU";
-        $batchId = "750D00000004SkGIAU";
-        $accountCreatedId = "001xx000003DHP0AAO";
+        $jobId = '750D00000004SkVIAU';
+        $batchId = '750D00000004SkGIAU';
+        $accountCreatedId = '001xx000003DHP0AAO';
 
         $operation = 'insert';
         $objectType = 'Account';
         $data = $this->dataArray();
-        $batchSize=2000;
-        $batchTimeout=600;
-        $contentType='json';
-        $pollIntervalSeconds=5;
+        $batchSize = 2000;
+        $batchTimeout = 600;
+        $contentType = 'json';
+        $pollIntervalSeconds = 5;
 
         $job = $salesforce->bulk()->runBatch($operation, $objectType, $data, $batchSize, $batchTimeout, $contentType, $pollIntervalSeconds);
 
         $this->assertEquals($jobId, $job->id);
 
-        foreach($job->batches as $batch){
+        foreach ($job->batches as $batch) {
             $this->assertEquals($batchId, $batch->id);
-            foreach($batch->records as $record){
+            foreach ($batch->records as $record) {
                 var_dump($record);
                 $this->assertEquals($accountCreatedId, $record['id']);
                 $this->assertTrue($record['success']);
@@ -143,46 +142,46 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         }
     }
 
-    public function jobArray($overrides=[])
+    public function jobArray($overrides = [])
     {
         return array_replace([
-            "apexProcessingTime" => 0,
-            "apiActiveProcessingTime" => 0,
-            "apiVersion" => 36.0,
-            "concurrencyMode" => "Parallel",
-            "contentType" => "JSON",
-            "createdById" => "005D0000001b0fFIAQ",
-            "createdDate" => "2015-12-15T20:45:25.000+0000",
-            "id" => "750D00000004SkVIAU",
-            "numberBatchesCompleted" => 0,
-            "numberBatchesFailed" => 0,
-            "numberBatchesInProgress" => 0,
-            "numberBatchesQueued" => 0,
-            "numberBatchesTotal" => 0,
-            "numberRecordsFailed" => 0,
-            "numberRecordsProcessed" => 0,
-            "numberRetries" => 0,
-            "object" => "Account",
-            "operation" => "insert",
-            "state" => "Open",
-            "systemModstamp" => "2015-12-15T20:45:25.000+0000",
-            "totalProcessingTime" => 0,
+            'apexProcessingTime'      => 0,
+            'apiActiveProcessingTime' => 0,
+            'apiVersion'              => 36.0,
+            'concurrencyMode'         => 'Parallel',
+            'contentType'             => 'JSON',
+            'createdById'             => '005D0000001b0fFIAQ',
+            'createdDate'             => '2015-12-15T20:45:25.000+0000',
+            'id'                      => '750D00000004SkVIAU',
+            'numberBatchesCompleted'  => 0,
+            'numberBatchesFailed'     => 0,
+            'numberBatchesInProgress' => 0,
+            'numberBatchesQueued'     => 0,
+            'numberBatchesTotal'      => 0,
+            'numberRecordsFailed'     => 0,
+            'numberRecordsProcessed'  => 0,
+            'numberRetries'           => 0,
+            'object'                  => 'Account',
+            'operation'               => 'insert',
+            'state'                   => 'Open',
+            'systemModstamp'          => '2015-12-15T20:45:25.000+0000',
+            'totalProcessingTime'     => 0,
         ], $overrides);
     }
 
-    public function batchArray($overrides=[])
+    public function batchArray($overrides = [])
     {
         return array_replace([
-            "apexProcessingTime" => 0,
-            "apiActiveProcessingTime" => 0,
-            "createdDate" => "2015-12-15T20:45:25.000+0000",
-            "id" => "750D00000004SkGIAU",
-            "jobId" => "750D00000004SkVIAU",
-            "numberRecordsFailed" => 0,
-            "numberRecordsProcessed" => 0,
-            "state" => "Completed",
-            "systemModstamp" => "2015-12-15T20:45:25.000+0000",
-            "totalProcessingTime" => 0,
+            'apexProcessingTime'      => 0,
+            'apiActiveProcessingTime' => 0,
+            'createdDate'             => '2015-12-15T20:45:25.000+0000',
+            'id'                      => '750D00000004SkGIAU',
+            'jobId'                   => '750D00000004SkVIAU',
+            'numberRecordsFailed'     => 0,
+            'numberRecordsProcessed'  => 0,
+            'state'                   => 'Completed',
+            'systemModstamp'          => '2015-12-15T20:45:25.000+0000',
+            'totalProcessingTime'     => 0,
         ], $overrides);
     }
 
@@ -190,11 +189,11 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
     {
         return [
             [
-                'Name' => 'Test Account 1',
+                'Name'        => 'Test Account 1',
                 'description' => 'Created from Bulk API',
             ],
             [
-                'Name' => 'Test Account 2',
+                'Name'        => 'Test Account 2',
                 'description' => 'Created from Bulk API',
             ],
         ];
@@ -204,16 +203,16 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
     {
         return [
             [
-                "success" => true,
-                "created" => true,
-                "id" => "001xx000003DHP0AAO",
-                "errors" => [],
+                'success' => true,
+                'created' => true,
+                'id'      => '001xx000003DHP0AAO',
+                'errors'  => [],
             ],
             [
-                "success" => true,
-                "created" => true,
-                "id" => "001xx000003DHP1AAO",
-                "errors" => [],
+                'success' => true,
+                'created' => true,
+                'id'      => '001xx000003DHP1AAO',
+                'errors'  => [],
             ],
         ];
     }

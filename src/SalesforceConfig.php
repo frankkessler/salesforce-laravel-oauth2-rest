@@ -49,9 +49,9 @@ class SalesforceConfig
 
     protected static function getInitialConfig()
     {
-        if(class_exists('\Config')) {
+        if (class_exists('\Config')) {
             $config = \Config::get('salesforce');
-        }else{
+        } else {
             $config = include realpath('.').'../config/salesforce.php';
         }
         $config = ['salesforce' => $config];
