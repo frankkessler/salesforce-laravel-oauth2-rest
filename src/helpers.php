@@ -1,18 +1,19 @@
 <?php
 
-if(!function_exists('get_object_public_vars')) {
+if (!function_exists('get_object_public_vars')) {
     function get_object_public_vars($object)
     {
         return get_object_vars($object);
     }
 }
 
-if (! function_exists('env')) {
+if (!function_exists('env')) {
     /**
      * Gets the value of an environment variable. Supports boolean, empty and null.
      *
-     * @param  string  $key
-     * @param  mixed   $default
+     * @param string $key
+     * @param mixed  $default
+     *
      * @return mixed
      */
     function env($key, $default = null)
