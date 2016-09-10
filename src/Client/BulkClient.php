@@ -1,6 +1,6 @@
 <?php
 
-namespace CommerceGuys\Guzzle\Oauth2;
+namespace Frankkessler\Salesforce\Client;
 
 use CommerceGuys\Guzzle\Oauth2\GrantType\GrantTypeInterface;
 use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshTokenGrantTypeInterface;
@@ -28,9 +28,11 @@ class BulkClient extends Oauth2Client{
     protected $refreshTokenGrantType;
 
 
-    public function __construct($config=[]){
-
-        $config['handler'] = $this->returnHandlers();
+    public function __construct($config=[])
+    {
+        if(!isset($config['handler'])) {
+            $config['handler'] = $this->returnHandlers();
+        }
 
         parent::__construct($config);
     }

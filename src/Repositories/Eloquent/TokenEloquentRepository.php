@@ -4,9 +4,9 @@ namespace Frankkessler\Salesforce\Repositories\Eloquent;
 
 use Auth;
 use CommerceGuys\Guzzle\Oauth2\AccessToken;
-use Config;
 use Frankkessler\Salesforce\Models\SalesforceToken;
 use Frankkessler\Salesforce\Repositories\TokenRepositoryInterface;
+use Frankkessler\Salesforce\SalesforceConfig;
 
 class TokenEloquentRepository implements TokenRepositoryInterface
 {
@@ -33,10 +33,9 @@ class TokenEloquentRepository implements TokenRepositoryInterface
     public function getTokenRecord($user_id = null)
     {
         if (is_null($user_id)) {
-            $user_id = Config::get('salesforce.storage_global_user_id');
+            $user_id = SalesforceConfig::get('salesforce.storage_global_user_id');
             if (is_null($user_id)) {
-                $user = Auth::user();
-                if ($user) {
+                if (class_exists('\Auth') && $user = \Auth::user()) {
                     $user_id = $user->id;
                 } else {
                     $user_id = 0;
@@ -57,10 +56,9 @@ class TokenEloquentRepository implements TokenRepositoryInterface
     public function setTokenRecord(AccessToken $token, $user_id = null)
     {
         if (is_null($user_id)) {
-            $user_id = Config::get('salesforce.storage_global_user_id');
+            $user_id = SalesforceConfig::get('salesforce.storage_global_user_id');
             if (is_null($user_id)) {
-                $user = Auth::user();
-                if ($user) {
+                if (class_exists('\Auth') && $user = \Auth::user()) {
                     $user_id = $user->id;
                 } else {
                     $user_id = 0;

@@ -25,11 +25,18 @@ class Salesforce
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
 
+        $client_config = [
+            'base_uri' => $base_uri,
+            'auth' => 'oauth2',
+        ];
+
+        //allow for override of default oauth2 handler
+        if(isset($config['handler'])){
+            $client_config['handler'] = $config['handler'];
+        }
+
         if(!$this->oauth2Client) {
-            $this->oauth2Client = new Oauth2Client([
-                'base_uri' => $base_uri,
-                'auth' => 'oauth2',
-            ]);
+            $this->oauth2Client = new Oauth2Client($client_config);
         }
 
         //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
@@ -218,6 +225,9 @@ class Salesforce
         ]);
     }
 
+    /**
+     * @return Bulk
+     */
     public function bulk()
     {
         if(!$this->bulk_api){
