@@ -16,20 +16,21 @@ class SalesforceResponse
 
     /**
      * Treatment constructor.
+     *
      * @param array $data
      * @param array $defaults
      * @param array $overrides
      */
-    public function __construct($data=[])
+    public function __construct($data = [])
     {
-        if(!is_array($data)){
+        if (!is_array($data)) {
             $data = [];
         }
 
-        foreach($data as $key=>$value){
-            if(property_exists($this,$key) && $key != 'additional_fields'){
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key) && $key != 'additional_fields') {
                 $this->{$key} = $value;
-            }else{
+            } else {
                 $this->additional_fields[$key] = $value;
             }
         }
