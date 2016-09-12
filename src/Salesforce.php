@@ -21,7 +21,7 @@ class Salesforce
         //Allow custom config to be applied through the constructor
         SalesforceConfig::setInitialConfig($config);
 
-        $this->log('debug','Salesforce::__construct - STARTED');
+        $this->log('debug', 'Salesforce::__construct - STARTED');
 
         $this->repository = new TokenRepository();
 
@@ -29,21 +29,21 @@ class Salesforce
 
         $client_config = [
             'base_uri' => $base_uri,
-            'auth' => 'oauth2',
+            'auth'     => 'oauth2',
         ];
 
         //allow for override of default oauth2 handler
-        if(isset($config['handler'])){
+        if (isset($config['handler'])) {
             $client_config['handler'] = $config['handler'];
         }
 
-        $this->log('debug','Salesforce::__construct - BEFORE OAUTH CLIENT');
+        $this->log('debug', 'Salesforce::__construct - BEFORE OAUTH CLIENT');
 
-        if(!$this->oauth2Client) {
+        if (!$this->oauth2Client) {
             $this->oauth2Client = new Oauth2Client($client_config);
         }
 
-        $this->log('debug','Salesforce::__construct - BEFORE GET TOKEN');
+        $this->log('debug', 'Salesforce::__construct - BEFORE GET TOKEN');
 
         //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
         if (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')) {
@@ -55,7 +55,7 @@ class Salesforce
         $access_token = SalesforceConfig::get('salesforce.oauth.access_token');
         $refresh_token = SalesforceConfig::get('salesforce.oauth.refresh_token');
 
-        $this->log('debug','Salesforce::__construct - BEFORE SET TOKEN');
+        $this->log('debug', 'Salesforce::__construct - BEFORE SET TOKEN');
         //Set access token and refresh token in Guzzle oauth client
         $this->oauth2Client->setAccessToken($access_token, $access_token_type = 'Bearer');
         $this->oauth2Client->setRefreshToken($refresh_token);
@@ -66,29 +66,31 @@ class Salesforce
             'token_url'     => 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri'),
             'auth_location' => 'body',
         ];
-        $this->log('debug','Salesforce::__construct - BEFORE REFRESH TOKEN');
+        $this->log('debug', 'Salesforce::__construct - BEFORE REFRESH TOKEN');
         $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
     }
 
     /**
-     * Get full sObject
+     * Get full sObject.
+     *
      * @param $id
      * @param $type
+     *
      * @return array|mixed
      */
-
     public function getObject($id, $type)
     {
         return $this->call_api('get', 'sobjects/'.$type.'/'.$id);
     }
 
     /**
-     * Create sObject
+     * Create sObject.
+     *
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return array|mixed
      */
-
     public function createObject($type, $data)
     {
         return $this->call_api('post', 'sobjects/'.$type, [
@@ -101,13 +103,14 @@ class Salesforce
     }
 
     /**
-     * Update sObject
+     * Update sObject.
+     *
      * @param string $id
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return array|mixed
      */
-
     public function updateObject($id, $type, $data)
     {
         if (!$id && isset($data['id'])) {
@@ -238,7 +241,7 @@ class Salesforce
      */
     public function bulk()
     {
-        if(!$this->bulk_api){
+        if (!$this->bulk_api) {
             $this->bulk_api = new Bulk($this->config);
         }
 
@@ -261,17 +264,17 @@ class Salesforce
             $response_code = $response->getStatusCode();
 
             $data = [
-                'operation' => '',
-                'success' => false,
+                'operation'      => '',
+                'success'        => false,
                 'message_string' => '',
-                'http_status' => 500,
+                'http_status'    => 500,
 
             ];
 
             if ($response_code == 200) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
 
                 $data['operation'] = 'create';
 
@@ -293,9 +296,9 @@ class Salesforce
                 }
             } else {
                 $full_data = json_decode((string) $response->getBody(), true);
-                if(count($full_data) > 1){
+                if (count($full_data) > 1) {
                     $data = array_merge($data, $full_data);
-                }else{
+                } else {
                     $data = array_merge($data, current($full_data));
                 }
 
@@ -333,10 +336,10 @@ class Salesforce
 
     protected function log($level, $message)
     {
-        if($this->config['logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])){
-            return call_user_func([$this->config['logger'], $level],$message);
-        }else{
-            return null;
+        if ($this->config['logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])) {
+            return call_user_func([$this->config['logger'], $level], $message);
+        } else {
+            return;
         }
     }
 
