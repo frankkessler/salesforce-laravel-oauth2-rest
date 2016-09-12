@@ -21,6 +21,8 @@ class Salesforce
         //Allow custom config to be applied through the constructor
         SalesforceConfig::setInitialConfig($config);
 
+        $this->log('debug','Salesforce::__construct - STARTED');
+
         $this->repository = new TokenRepository();
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
@@ -35,9 +37,13 @@ class Salesforce
             $client_config['handler'] = $config['handler'];
         }
 
+        $this->log('debug','Salesforce::__construct - BEFORE OAUTH CLIENT');
+
         if(!$this->oauth2Client) {
             $this->oauth2Client = new Oauth2Client($client_config);
         }
+
+        $this->log('debug','Salesforce::__construct - BEFORE GET TOKEN');
 
         //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
         if (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')) {
@@ -49,6 +55,7 @@ class Salesforce
         $access_token = SalesforceConfig::get('salesforce.oauth.access_token');
         $refresh_token = SalesforceConfig::get('salesforce.oauth.refresh_token');
 
+        $this->log('debug','Salesforce::__construct - BEFORE SET TOKEN');
         //Set access token and refresh token in Guzzle oauth client
         $this->oauth2Client->setAccessToken($access_token, $access_token_type = 'Bearer');
         $this->oauth2Client->setRefreshToken($refresh_token);
@@ -59,6 +66,7 @@ class Salesforce
             'token_url'     => 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri'),
             'auth_location' => 'body',
         ];
+        $this->log('debug','Salesforce::__construct - BEFORE REFRESH TOKEN');
         $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
     }
 
@@ -268,9 +276,9 @@ class Salesforce
                 $data['operation'] = 'create';
 
                 if (isset($data['id'])) {
+                    //make responses more uniform by setting a newly created id as an Id field like you would see from a get
                     $data['Id'] = $data['id'];
                 }
-                unset($data['id']);
             } elseif ($response_code == 204) {
                 if (strtolower($method) == 'delete') {
                     $data = array_merge($data, [
@@ -285,7 +293,12 @@ class Salesforce
                 }
             } else {
                 $full_data = json_decode((string) $response->getBody(), true);
-                $data = array_merge($data, current($full_data));
+                if(count($full_data) > 1){
+                    $data = array_merge($data, $full_data);
+                }else{
+                    $data = array_merge($data, current($full_data));
+                }
+
 
                 if ($data && isset($data['message'])) {
                     $data['message_string'] = $data['message'];
@@ -316,6 +329,15 @@ class Salesforce
         }
 
         return [];
+    }
+
+    protected function log($level, $message)
+    {
+        if($this->config['logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])){
+            return call_user_func([$this->config['logger'], $level],$message);
+        }else{
+            return null;
+        }
     }
 
     protected function updateAccessToken($current_access_token)

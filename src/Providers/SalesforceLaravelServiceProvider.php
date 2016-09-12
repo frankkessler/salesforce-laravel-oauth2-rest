@@ -46,7 +46,11 @@ class SalesforceLaravelServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app['salesforce'] = $this->app->share(function ($app) {
-            return $app->make('Frankkessler\Salesforce\Salesforce');
+            return $app->make('Frankkessler\Salesforce\Salesforce',[
+                'config' => [
+                    'logger' => $app['log'],
+                ],
+            ]);
         });
     }
 }

@@ -4,9 +4,9 @@ return [
     'api' => [
         'domain' => env('SALESFORCE_API_DOMAIN', 'na1.salesforce.com'),
 
-        'base_uri' => env('SALESFORCE_API_BASE_URI', '/services/data/v35.0/'),
+        'base_uri' => env('SALESFORCE_API_BASE_URI', '/services/data/v36.0/'),
 
-        'version' => env('SALESFORCE_API_BASE_URI', 'v35.0'),
+        'version' => env('SALESFORCE_API_BASE_VERSION', '36.0'),
     ],
     'oauth' => [
         'domain' => env('SALESFORCE_OAUTH_DOMAIN', 'login.salesforce.com'),

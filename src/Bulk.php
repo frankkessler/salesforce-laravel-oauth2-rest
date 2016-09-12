@@ -4,13 +4,14 @@ namespace Frankkessler\Salesforce;
 
 use Frankkessler\Salesforce\Client\BulkClient;
 use Frankkessler\Salesforce\Responses\BulkBatchResponse;
+use Frankkessler\Salesforce\Responses\BulkBatchResultResponse;
 use Frankkessler\Salesforce\Responses\BulkJobResponse;
 
 class Bulk extends Salesforce
 {
     public function __construct($config=[])
     {
-        $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
+        $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain');
 
         $client_config = [
             'base_uri' => $base_uri,
@@ -25,16 +26,20 @@ class Bulk extends Salesforce
         parent::__construct($config);
     }
 
-    public function runBatch($operation, $objectType, $data, $batchSize=2000, $batchTimeout=600, $contentType='json', $pollIntervalSeconds=5)
+    public function runBatch($operation, $objectType, $data, $batchSize=2000, $batchTimeout=600, $contentType='JSON', $pollIntervalSeconds=5)
     {
         $batches = [];
 
+        $this->log('debug','Bulk::runBatch - STARTED');
+
         $job = $this->createJob($operation, $objectType, $contentType);
 
-        $totalNumberOfBatches = ceil(count($data)/$batchSize);
+        if($job->id) {
+            $totalNumberOfBatches = ceil(count($data) / $batchSize);
 
-        for($i=1;$i<=$totalNumberOfBatches;$i++) {
-            $batches[] = $this->addBatch($job->id, $data);
+            for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
+                $batches[] = $this->addBatch($job->id, array_splice($data,($i-1)*$batchSize,$batchSize));
+            }
         }
 
         $time = time();
@@ -52,7 +57,8 @@ class Bulk extends Salesforce
 
                 $batch = $this->batchDetails($job->id, $batch->id);
                 if (in_array($batch->state, ['Completed','Failed','Not Processed'])) {
-                    $batch->records = $this->batchResult($job->id, $batch->id);
+                    $batchResult = $this->batchResult($job->id, $batch->id);
+                    $batch->records = $batchResult->records;
                     $batches_finished[] = $batch->id;
                 }
             }
@@ -81,9 +87,9 @@ class Bulk extends Salesforce
      * @return BulkJobResponse
      */
 
-    public function createJob($operation, $objectType, $contentType='json')
+    public function createJob($operation, $objectType, $contentType='JSON')
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
         $json_array = [
             'operation' => $operation,
             'object' => $objectType,
@@ -91,11 +97,10 @@ class Bulk extends Salesforce
         ];
 
         $result = $this->call_api('post',$url, [
-            'body' => json_encode($json_array),
-            'headers' => [
-                'Content-type' => 'application/json',
-            ]
+            'json' => $json_array,
         ]);
+
+        $this->log('debug','Bulk::createJob - '.json_encode($result));
 
         if($result && isset($result['id']) && $result['id']){
             return new BulkJobResponse($result);
@@ -105,7 +110,7 @@ class Bulk extends Salesforce
 
     public function jobDetails($jobId)
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
 
         $result = $this->call_api('get',$url);
 
@@ -125,17 +130,14 @@ class Bulk extends Salesforce
      */
     public function closeJob($jobId)
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
 
         $json_array = [
             'state' => 'Closed',
         ];
 
         $result = $this->call_api('post',$url, [
-            'body' => json_encode($json_array),
-            'headers' => [
-                'Content-type' => 'application/json',
-            ]
+            'json' => json_encode($json_array),
         ]);
 
         if($result && isset($result['id']) && $result['id']){
@@ -152,10 +154,15 @@ class Bulk extends Salesforce
      */
     public function addBatch($jobId, $data)
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch';
+        if(!$jobId){
+            //throw exception
+            return new BulkBatchResponse();
+        }
+
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch';
 
         $result = $this->call_api('post',$url, [
-            'body' => json_encode($data),
+            'body' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK),
             'headers' => [
                 'Content-type' => 'application/json',
             ]
@@ -176,7 +183,7 @@ class Bulk extends Salesforce
 
     public function batchDetails($jobId, $batchId)
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId;
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId;
 
         $result = $this->call_api('get',$url);
 
@@ -191,18 +198,33 @@ class Bulk extends Salesforce
     /**
      * @param $jobId
      * @param $batchId
-     * @return array
+     * @return BulkBatchResultResponse
      */
 
     public function batchResult($jobId, $batchId)
     {
-        $url = 'services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId.'/result';
+        if(!$jobId || !$batchId){
+            //throw exception
+            return new BulkBatchResultResponse();
+        }
+
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId.'/result';
 
         $result = $this->call_api('get',$url);
-var_dump($result);
+
         if($result && is_array($result)){
-            return $result;
+            //maximum amount of batch records allowed it 10,000
+            for($i=0;$i<10000;$i++){
+                //skip processing for the rest of the records if they don't exist
+                if(!isset($result[$i])){
+                    break;
+                }
+                $result['records'][$i] = $result[$i];
+                unset($result[$i]);
+            }
+            return new BulkBatchResultResponse($result);
         }
-        return [];
+
+        return new BulkBatchResultResponse($result);
     }
 }
