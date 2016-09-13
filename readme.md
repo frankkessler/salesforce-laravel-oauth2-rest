@@ -1,4 +1,4 @@
-[![Travis CI Build Status](https://api.travis-ci.org/frankkessler/salesforce-laravel-oauth2-rest.svg)(https://travis-ci.org/frankkessler/salesforce-laravel-oauth2-rest/)][![Latest Stable Version](https://poser.pugx.org/frankkessler/salesforce-laravel-oauth2-rest/v/stable)](https://packagist.org/packages/frankkessler/salesforce-laravel-oauth2-rest)[![StyleCI](https://styleci.io/repos/42465034/shield)](https://styleci.io/repos/42465034)
+[![Travis CI Build Status](https://api.travis-ci.org/frankkessler/salesforce-laravel-oauth2-rest.svg)](https://travis-ci.org/frankkessler/salesforce-laravel-oauth2-rest/)[![Latest Stable Version](https://poser.pugx.org/frankkessler/salesforce-laravel-oauth2-rest/v/stable)](https://packagist.org/packages/frankkessler/salesforce-laravel-oauth2-rest)[![StyleCI](https://styleci.io/repos/42465034/shield)](https://styleci.io/repos/42465034)
 
 # API CHANGES
 There are major breaking changes between the 0.3 branch and the 0.4 branch.  Keep in mind that this package IS NOT yet stable.
