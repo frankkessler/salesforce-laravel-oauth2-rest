@@ -2,7 +2,6 @@
 
 namespace Frankkessler\Salesforce;
 
-
 use Frankkessler\Salesforce\Responses\Query\QueryResponse;
 use Frankkessler\Salesforce\Responses\Query\SearchResponse;
 
@@ -19,9 +18,10 @@ class Query
     }
 
     /**
-     * SOQL Query
+     * SOQL Query.
      *
      * @param $query
+     *
      * @return QueryResponse
      */
     public function query($query)
@@ -32,13 +32,12 @@ class Query
     }
 
     /**
-     * SOQL Query and follow next URL until all records are gathered
+     * SOQL Query and follow next URL until all records are gathered.
      *
      * @param $query
      *
      * @return QueryResponse
      */
-
     public function queryFollowNext($query)
     {
         return new QueryResponse(
@@ -47,7 +46,7 @@ class Query
     }
 
     /**
-     * SOQL Query including deleted records
+     * SOQL Query including deleted records.
      *
      * @param $query
      *
@@ -61,7 +60,7 @@ class Query
     }
 
     /**
-     * SOQL Query including deleted records and follow next URL until all records are gathered
+     * SOQL Query including deleted records and follow next URL until all records are gathered.
      *
      * @param $query
      *
@@ -75,7 +74,7 @@ class Query
     }
 
     /**
-     * Search using the SOSL query language
+     * Search using the SOSL query language.
      *
      * @param $query
      *

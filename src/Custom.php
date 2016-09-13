@@ -2,7 +2,6 @@
 
 namespace Frankkessler\Salesforce;
 
-
 class Custom
 {
     /**

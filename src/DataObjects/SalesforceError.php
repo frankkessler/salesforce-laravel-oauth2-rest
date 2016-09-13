@@ -21,16 +21,17 @@ class SalesforceError
 
     public function __construct($data)
     {
-        $this->fields       = isset($data['fields'])?$data['fields']:'';
-        $this->message      = isset($data['message'])?$data['message']:'';
-        $this->errorCode    = isset($data['errorCode'])?$data['errorCode']:'';
+        $this->fields = isset($data['fields']) ? $data['fields'] : '';
+        $this->message = isset($data['message']) ? $data['message'] : '';
+        $this->errorCode = isset($data['errorCode']) ? $data['errorCode'] : '';
     }
 
     public function isValid()
     {
-        if($this->message || $this->errorCode){
+        if ($this->message || $this->errorCode) {
             return true;
         }
+
         return false;
     }
 }
