@@ -12,7 +12,7 @@ class SearchResponse extends SalesforceBaseResponse
     public $records;
 
     /**
-     * @var integer
+     * @var int
      */
     public $totalSize;
 

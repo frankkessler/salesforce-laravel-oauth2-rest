@@ -7,12 +7,12 @@ use Frankkessler\Salesforce\DataObjects\SalesforceError;
 class SalesforceBaseResponse extends BaseResponse
 {
     /**
-     * @var boolean
+     * @var bool
      */
     public $success;
 
     /**
-     * @var integer
+     * @var int
      */
     public $http_status_code;
 
@@ -41,25 +41,25 @@ class SalesforceBaseResponse extends BaseResponse
      */
     protected $raw_body;
 
-    public function __construct($data=[])
+    public function __construct($data = [])
     {
-        if(isset($data['raw_sfdc_error'])){
+        if (isset($data['raw_sfdc_error'])) {
             $this->error = new SalesforceError(json_decode($data['raw_sfdc_error'], true));
         }
 
-        if(isset($data['http_status'])){
-            $this->http_status_code = (int)$data['http_status'];
+        if (isset($data['http_status'])) {
+            $this->http_status_code = (int) $data['http_status'];
             unset($data['http_status']);
         }
         parent::__construct($data);
 
-        if(!$this->success && $this->http_status_code >= 200 && $this->http_status_code <= 299){
+        if (!$this->success && $this->http_status_code >= 200 && $this->http_status_code <= 299) {
             $this->success = true;
         }
     }
 
     /**
-     * Get Raw Headers from Http Response
+     * Get Raw Headers from Http Response.
      *
      * @return array
      */
@@ -69,7 +69,7 @@ class SalesforceBaseResponse extends BaseResponse
     }
 
     /**
-     * Get Raw body from Http Response
+     * Get Raw body from Http Response.
      *
      * @return string
      */
