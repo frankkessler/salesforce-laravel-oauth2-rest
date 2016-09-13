@@ -7,12 +7,12 @@ use Frankkessler\Salesforce\Responses\SalesforceBaseResponse;
 class QueryResponse extends SalesforceBaseResponse
 {
     /**
-     * @var integer
+     * @var int
      */
     public $totalSize;
 
     /**
-     * @var boolean
+     * @var bool
      */
     public $done;
 
