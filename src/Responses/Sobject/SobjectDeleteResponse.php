@@ -6,5 +6,4 @@ use Frankkessler\Salesforce\Responses\SalesforceBaseResponse;
 
 class SobjectDeleteResponse extends SalesforceBaseResponse
 {
-
 }

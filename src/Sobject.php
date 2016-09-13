@@ -2,7 +2,6 @@
 
 namespace Frankkessler\Salesforce;
 
-
 use Frankkessler\Salesforce\Responses\Sobject\SobjectDeleteResponse;
 use Frankkessler\Salesforce\Responses\Sobject\SobjectGetResponse;
 use Frankkessler\Salesforce\Responses\Sobject\SobjectInsertResponse;
@@ -21,12 +20,13 @@ class Sobject
     }
 
     /**
-     * Get full sObject
+     * Get full sObject.
+     *
      * @param $id
      * @param $type
+     *
      * @return SobjectGetResponse
      */
-
     public function get($id, $type)
     {
         return new SobjectGetResponse(
@@ -35,12 +35,13 @@ class Sobject
     }
 
     /**
-     * Create sObject
+     * Create sObject.
+     *
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return SobjectInsertResponse
      */
-
     public function insert($type, $data)
     {
         return new SobjectInsertResponse(
@@ -55,13 +56,14 @@ class Sobject
     }
 
     /**
-     * Update sObject
+     * Update sObject.
+     *
      * @param string $id
      * @param string $type
-     * @param array $data
+     * @param array  $data
+     *
      * @return SobjectUpdateResponse
      */
-
     public function update($id, $type, $data)
     {
         if (!$id && isset($data['id'])) {
@@ -89,6 +91,7 @@ class Sobject
     /**
      * @param $id
      * @param $type
+     *
      * @return array|SobjectDeleteResponse
      */
     public function delete($id, $type)

@@ -45,15 +45,15 @@ class Salesforce
 
         $client_config = [
             'base_uri' => $base_uri,
-            'auth' => 'oauth2',
+            'auth'     => 'oauth2',
         ];
 
         //allow for override of default oauth2 handler
-        if(isset($config['handler'])){
+        if (isset($config['handler'])) {
             $client_config['handler'] = $config['handler'];
         }
 
-        if(!$this->oauth2Client) {
+        if (!$this->oauth2Client) {
             $this->oauth2Client = new Oauth2Client($client_config);
         }
 
@@ -81,35 +81,34 @@ class Salesforce
     }
 
     /**
-     * Get full sObject (DEPRECATED)
+     * Get full sObject (DEPRECATED).
      *
      * @param $id
      * @param $type
      *
      * @return array|mixed
      */
-
     public function getObject($id, $type)
     {
         $result = $this->sobject()->get($id, $type);
 
         $array_result = array_replace($result->toArray(), $result->sobject);
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * Create sObject (DEPRECATED)
+     * Create sObject (DEPRECATED).
      *
      * @param string $type
-     * @param array $data
+     * @param array  $data
      *
      * @return array|mixed
      */
-
     public function createObject($type, $data)
     {
         $result = $this->sobject()->insert($type, $data);
@@ -118,36 +117,37 @@ class Salesforce
 
         $array_result['Id'] = $result->id;
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * Update sObject (DEPRECATED)
+     * Update sObject (DEPRECATED).
      *
      * @param string $id
      * @param string $type
-     * @param array $data
+     * @param array  $data
      *
      * @return array|mixed
      */
-
     public function updateObject($id, $type, $data)
     {
         $result = $this->sobject()->update($id, $type, $data);
 
         $array_result = $result->toArray();
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * Delete Object (DEPRECATED)
+     * Delete Object (DEPRECATED).
      *
      * @param $id
      * @param $type
@@ -160,14 +160,15 @@ class Salesforce
 
         $array_result = $result->toArray();
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * Get Object by External Id (DEPRECATED)
+     * Get Object by External Id (DEPRECATED).
      *
      * @param $external_field_name
      * @param $external_id
@@ -181,14 +182,15 @@ class Salesforce
 
         $array_result = $result->toArray();
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * Upsert an object by an External Id
+     * Upsert an object by an External Id.
      *
      * @param $external_field_name
      * @param $external_id
@@ -205,16 +207,18 @@ class Salesforce
 
         $array_result['Id'] = $result->id;
 
-        if($result->error->isValid()){
+        if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
         }
+
         return $array_result;
     }
 
     /**
-     * SOQL Query (DEPRECATED)
+     * SOQL Query (DEPRECATED).
      *
      * @param $query
+     *
      * @return array
      */
     public function query_legacy($query)
@@ -223,20 +227,19 @@ class Salesforce
     }
 
     /**
-     * SOQL Query and follow next URL until all records are gathered (DEPRECATED)
+     * SOQL Query and follow next URL until all records are gathered (DEPRECATED).
      *
      * @param $query
      *
      * @return array
      */
-
     public function queryFollowNext($query)
     {
         return $this->query()->queryFollowNext($query)->toArray();
     }
 
     /**
-     * SOQL Query including deleted records (DEPRECATED)
+     * SOQL Query including deleted records (DEPRECATED).
      *
      * @param $query
      *
@@ -248,7 +251,7 @@ class Salesforce
     }
 
     /**
-     * SOQL Query including deleted records and follow next URL until all records are gathered (DEPRECATED)
+     * SOQL Query including deleted records and follow next URL until all records are gathered (DEPRECATED).
      *
      * @param $query
      *
@@ -260,13 +263,12 @@ class Salesforce
     }
 
     /**
-     * SOSL Query (DEPRECATED)
+     * SOSL Query (DEPRECATED).
      *
      * @param $query
      *
      * @return array
      */
-
     public function search($query)
     {
         //TODO: put response records into records parameter
@@ -274,7 +276,7 @@ class Salesforce
     }
 
     /**
-     * GET request for custom APEX web service endpoint (DEPRECATED
+     * GET request for custom APEX web service endpoint (DEPRECATED.
      *
      * @param $uri
      *
@@ -286,7 +288,7 @@ class Salesforce
     }
 
     /**
-     * POST request for custom APEX web service endpoint (DEPRECATED)
+     * POST request for custom APEX web service endpoint (DEPRECATED).
      *
      * @param $uri
      * @param $data
@@ -319,7 +321,7 @@ class Salesforce
      */
     public function sobject()
     {
-        if(!$this->sobject_api){
+        if (!$this->sobject_api) {
             $this->sobject_api = new Sobject($this);
         }
 
@@ -329,14 +331,14 @@ class Salesforce
     /**
      * @return Query
      */
-    public function query($legacy_query=null)
+    public function query($legacy_query = null)
     {
         //TODO: DEPRECATE IN NEXT RELEASE
-        if($legacy_query){
+        if ($legacy_query) {
             return $this->query_legacy($legacy_query);
         }
 
-        if(!$this->query_api){
+        if (!$this->query_api) {
             $this->query_api = new Query($this);
         }
 
@@ -348,7 +350,7 @@ class Salesforce
      */
     public function custom()
     {
-        if(!$this->custom_api){
+        if (!$this->custom_api) {
             $this->custom_api = new Custom($this);
         }
 
@@ -360,7 +362,7 @@ class Salesforce
      */
     public function bulk()
     {
-        if(!$this->bulk_api){
+        if (!$this->bulk_api) {
             $this->bulk_api = new Bulk($this->config);
         }
 
@@ -368,7 +370,7 @@ class Salesforce
     }
 
     /**
-     * Api Call to Salesforce
+     * Api Call to Salesforce.
      *
      * @param $method
      * @param $url
@@ -377,7 +379,6 @@ class Salesforce
      *
      * @return array
      */
-
     public function call_api($method, $url, $options = [], $debug_info = [])
     {
         try {
@@ -396,18 +397,18 @@ class Salesforce
             $response_code = $response->getStatusCode();
 
             $data = [
-                'operation' => '',
-                'success' => false,
+                'operation'      => '',
+                'success'        => false,
                 'message_string' => '',
-                'http_status' => $response_code,
-                'raw_headers' => $headers,
-                'raw_body' => (string) $response->getBody(),
+                'http_status'    => $response_code,
+                'raw_headers'    => $headers,
+                'raw_body'       => (string) $response->getBody(),
             ];
 
             if ($response_code == 200) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
-                $data = array_replace($data,json_decode((string) $response->getBody(), true));
+                $data = array_replace($data, json_decode((string) $response->getBody(), true));
 
                 $data['operation'] = 'create';
 
@@ -418,22 +419,22 @@ class Salesforce
             } elseif ($response_code == 204) {
                 if (strtolower($method) == 'delete') {
                     $data = array_merge($data, [
-                        'success'   => true,
-                        'operation' => 'delete',
+                        'success'     => true,
+                        'operation'   => 'delete',
                         'http_status' => 204,
                     ]);
                 } else {
                     $data = array_merge($data, [
-                        'success'   => true,
-                        'operation' => 'update',
+                        'success'     => true,
+                        'operation'   => 'update',
                         'http_status' => 204,
                     ]);
                 }
             } else {
                 $full_data = json_decode((string) $response->getBody(), true);
-                if(count($full_data) > 1){
+                if (count($full_data) > 1) {
                     $data = array_merge($data, $full_data);
-                }else{
+                } else {
                     $data = array_merge($data, current($full_data));
                 }
 
@@ -463,7 +464,7 @@ class Salesforce
             $data['success'] = false;
             $data = array_merge($debug_info, $data);
 
-            $this->log('error','Salesforce-Salesforce::call_api - '.$e->getMessage().' - '.$e->getFile().':'.$e->getLine());
+            $this->log('error', 'Salesforce-Salesforce::call_api - '.$e->getMessage().' - '.$e->getFile().':'.$e->getLine());
 
             return $data;
         }
@@ -473,10 +474,10 @@ class Salesforce
 
     protected function log($level, $message)
     {
-        if($this->config['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])){
-            return call_user_func([$this->config['salesforce.logger'], $level],$message);
-        }else{
-            return null;
+        if ($this->config['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])) {
+            return call_user_func([$this->config['salesforce.logger'], $level], $message);
+        } else {
+            return;
         }
     }
 

@@ -3,7 +3,6 @@
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
 
 class QueryTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
 {
@@ -17,18 +16,18 @@ class QueryTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
         $result = $salesforce->query()->query('SELECT Id, Name FROM Account LIMIT 2');
 
         $this->assertTrue($result->success);
-        $this->assertEquals(2,count($result->records));
-        $this->assertEquals(2,$result->totalSize);
+        $this->assertEquals(2, count($result->records));
+        $this->assertEquals(2, $result->totalSize);
 
-        foreach($result->records as $record){
+        foreach ($result->records as $record) {
             $this->assertEquals('Test Account', $record['Name']);
             $this->assertEquals('001D000000IRFmaIAH', $record['Id']);
             break;
@@ -45,17 +44,17 @@ class QueryTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
         $result = $salesforce->query()->search('FIND {TEST ACCOUNT} IN ALL FIELDS RETURNING Account(Id, Name)');
-var_dump($result);
+        var_dump($result);
         $this->assertTrue($result->success);
-        $this->assertEquals(2,count($result->records));
+        $this->assertEquals(2, count($result->records));
 
-        foreach($result->records as $record){
+        foreach ($result->records as $record) {
             $this->assertEquals('Test Account', $record['Name']);
             $this->assertEquals('001D000000IqhSLIAZ', $record['Id']);
             break;
