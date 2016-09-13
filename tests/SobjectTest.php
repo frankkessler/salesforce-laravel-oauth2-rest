@@ -3,7 +3,6 @@
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
 
 class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
 {
@@ -17,8 +16,8 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
@@ -26,7 +25,7 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
 
         $this->assertEquals('001D000000IqhSLIAZ', $sobject->id);
         $this->assertTrue($sobject->success);
-        $this->assertEquals(201,(int)$sobject->http_status_code);
+        $this->assertEquals(201, (int) $sobject->http_status_code);
     }
 
     public function testGet()
@@ -43,8 +42,8 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
@@ -53,7 +52,7 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $this->assertEquals($Id, $sobject->sobject->Id);
         $this->assertEquals('Test Account 1', $sobject->sobject->Name);
         $this->assertTrue($sobject->success);
-        $this->assertEquals(200,(int)$sobject->http_status_code);
+        $this->assertEquals(200, (int) $sobject->http_status_code);
     }
 
     public function testUpdate()
@@ -68,16 +67,16 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
         $sobject = $salesforce->sobject()->update($Id, 'Account', $this->dataArray());
 
         $this->assertTrue($sobject->success);
-        $this->assertEquals('update',$sobject->operation);
-        $this->assertEquals(204,(int)$sobject->http_status_code);
+        $this->assertEquals('update', $sobject->operation);
+        $this->assertEquals(204, (int) $sobject->http_status_code);
     }
 
     public function testDelete()
@@ -92,31 +91,31 @@ class SobjectTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler' => $handler,
-            'salesforce.oauth.access_token' => 'TEST',
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
             'salesforce.oauth.refresh_token' => 'TEST',
         ]);
 
         $sobject = $salesforce->sobject()->delete($Id, 'Account');
 
         $this->assertTrue($sobject->success);
-        $this->assertEquals('delete',$sobject->operation);
-        $this->assertEquals(204,(int)$sobject->http_status_code);
+        $this->assertEquals('delete', $sobject->operation);
+        $this->assertEquals(204, (int) $sobject->http_status_code);
     }
 
-    public function createSuccessArray($overrides=[])
+    public function createSuccessArray($overrides = [])
     {
         return array_replace([
-            "id" => "001D000000IqhSLIAZ",
-            "errors" => [ ],
-            "success" => true
+            'id'      => '001D000000IqhSLIAZ',
+            'errors'  => [],
+            'success' => true,
         ], $overrides);
     }
 
-    public function dataArray($overrides=[])
+    public function dataArray($overrides = [])
     {
         return array_replace([
-            'Name' => 'Test Account 1',
+            'Name'        => 'Test Account 1',
             'description' => 'Created from Bulk API',
         ], $overrides);
     }

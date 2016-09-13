@@ -8,12 +8,12 @@ class BaseResponse implements Arrayable
 {
     private $additional_fields = [];
 
-    public function __construct($data=[])
+    public function __construct($data = [])
     {
-        foreach($data as $key=>$value){
-            if(property_exists($this,$key) && $key != 'additional_fields'){
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key) && $key != 'additional_fields') {
                 $this->{$key} = $value;
-            }else{
+            } else {
                 $this->additional_fields[$key] = $value;
             }
         }
@@ -32,7 +32,7 @@ class BaseResponse implements Arrayable
     }
 
     /**
-     * __toString implementation for this class
+     * __toString implementation for this class.
      *
      * @return string
      */
