@@ -52,7 +52,7 @@ class SalesforceConfig
         if (class_exists('\Config')) {
             $config = \Config::get('salesforce');
         } else {
-            $config = include realpath('.').'../config/salesforce.php';
+            $config = include realpath(__DIR__.'/..').'/config/salesforce.php';
         }
         $config = ['salesforce' => $config];
 
