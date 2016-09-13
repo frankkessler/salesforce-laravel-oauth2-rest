@@ -51,7 +51,7 @@ class QueryTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         ]);
 
         $result = $salesforce->query()->search('FIND {TEST ACCOUNT} IN ALL FIELDS RETURNING Account(Id, Name)');
-var_dump($result);
+
         $this->assertTrue($result->success);
         $this->assertEquals(2,count($result->records));
 
