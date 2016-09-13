@@ -2,11 +2,11 @@
 
 namespace Frankkessler\Salesforce\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Frankkessler\Salesforce\SalesforceConfig;
+use Illuminate\Support\ServiceProvider;
 
-class SalesforceLaravelServiceProvider extends ServiceProvider{
-
+class SalesforceLaravelServiceProvider extends ServiceProvider
+{
     /**
      * Bootstrap the application services.
      *
@@ -16,12 +16,12 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
     {
         // Publish your migrations
         $this->publishes([
-            __DIR__ . '/../../migrations/salesforce.php' => base_path('/database/migrations/2015_09_18_141101_create_salesforce_tokens_table.php')
+            __DIR__.'/../../migrations/salesforce.php' => base_path('/database/migrations/2015_09_18_141101_create_salesforce_tokens_table.php'),
         ], 'migrations');
 
         //publish config
         $this->publishes([
-            __DIR__ . '/../../config/salesforce.php' => config_path('salesforce.php'),
+            __DIR__.'/../../config/salesforce.php' => config_path('salesforce.php'),
         ], 'config');
 
         //merge default config if values were removed or never published
@@ -31,12 +31,13 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'salesforce');
 
         //set custom routes for admin pages
-        if(SalesforceConfig::get('salesforce.enable_oauth_routes')) {
+        if (SalesforceConfig::get('salesforce.enable_oauth_routes')) {
             if (!$this->app->routesAreCached()) {
-                require __DIR__ . '/../../http/routes.php';
+                require __DIR__.'/../../http/routes.php';
             }
         }
     }
+
     /**
      * Register the application services.
      *
@@ -44,10 +45,8 @@ class SalesforceLaravelServiceProvider extends ServiceProvider{
      */
     public function register()
     {
-        $this->app['salesforce'] = $this->app->share(function($app)
-        {
+        $this->app['salesforce'] = $this->app->share(function ($app) {
             return $app->make('Frankkessler\Salesforce\Salesforce');
         });
     }
-
 }
