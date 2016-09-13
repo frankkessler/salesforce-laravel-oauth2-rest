@@ -45,6 +45,8 @@ class SalesforceBaseResponse extends BaseResponse
     {
         if (isset($data['raw_sfdc_error'])) {
             $this->error = new SalesforceError(json_decode($data['raw_sfdc_error'], true));
+        } else {
+            $this->error = new SalesforceError([]);
         }
 
         if (isset($data['http_status'])) {
