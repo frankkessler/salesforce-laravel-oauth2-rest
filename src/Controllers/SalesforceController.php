@@ -2,14 +2,9 @@
 
 namespace Frankkessler\Salesforce\Controllers;
 
-use Illuminate\Http\Request;
-
-use App;
-
-use App\Http\Requests;
-use Frankkessler\Salesforce\Controllers\BaseController;
-use Illuminate\Support\Facades\View;
 use Frankkessler\Salesforce\Authentication;
+
+use Illuminate\Http\Request;
 
 class SalesforceController extends BaseController
 {
@@ -23,10 +18,12 @@ class SalesforceController extends BaseController
         return Authentication::returnAuthorizationLink();
     }
 
-    public function process_authorization_callback(Request $request){
-        if (!$request->has('code')){
+    public function process_authorization_callback(Request $request)
+    {
+        if (!$request->has('code')) {
             die;
         }
+
         return Authentication::processAuthenicationCode($request->input('code'));
     }
 }

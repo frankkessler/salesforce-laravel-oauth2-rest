@@ -1,29 +1,31 @@
 <?php
+
 namespace Frankkessler\Salesforce;
 
 use Config;
 
-class SalesforceConfig{
-
+class SalesforceConfig
+{
     private static $config;
 
-    public static function get($key=null)
+    public static function get($key = null)
     {
-        if(!self::$config){
+        if (!self::$config) {
             self::$config = self::getInitialConfig();
         }
 
-        if(is_null($key)){
+        if (is_null($key)) {
             return self::$config;
-        }elseif(isset(self::$config[$key])){
+        } elseif (isset(self::$config[$key])) {
             return self::$config[$key];
         }
+
         return '';
     }
 
     public static function set($key, $value)
     {
-        if(!self::$config){
+        if (!self::$config) {
             self::$config = self::getInitialConfig();
         }
         self::$config[$key] = $value;
@@ -34,9 +36,9 @@ class SalesforceConfig{
         self::$config = $config;
     }
 
-    public static function setInitialConfig($config=[])
+    public static function setInitialConfig($config = [])
     {
-        if(!self::$config) {
+        if (!self::$config) {
             self::$config = self::getInitialConfig();
         }
 
@@ -48,7 +50,8 @@ class SalesforceConfig{
     protected static function getInitialConfig()
     {
         $config = Config::get('salesforce');
-        $config = ['salesforce'=>$config];
+        $config = ['salesforce' => $config];
+
         return array_dot($config);
     }
 }
