@@ -196,10 +196,6 @@ $objectData = [
     ],
 ];
 
-$batchSize = 2000;
-$batchTimeout = 600;
-$contentType = 'JSON'; //only type supported right now.  Requires API version 36 or higher
-
 $result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData);
 
 if($result->success){
