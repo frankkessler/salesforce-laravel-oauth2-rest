@@ -48,7 +48,7 @@ class SalesforceLaravelServiceProvider extends ServiceProvider
         $this->app['salesforce'] = $this->app->share(function ($app) {
             return $app->make('Frankkessler\Salesforce\Salesforce',[
                 'config' => [
-                    'logger' => $app['log'],
+                    'salesforce.loggerg' => $app['log'],
                 ],
             ]);
         });

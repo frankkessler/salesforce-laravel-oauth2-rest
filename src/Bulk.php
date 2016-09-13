@@ -3,9 +3,9 @@
 namespace Frankkessler\Salesforce;
 
 use Frankkessler\Salesforce\Client\BulkClient;
-use Frankkessler\Salesforce\Responses\BulkBatchResponse;
-use Frankkessler\Salesforce\Responses\BulkBatchResultResponse;
-use Frankkessler\Salesforce\Responses\BulkJobResponse;
+use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResponse;
+use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResultResponse;
+use Frankkessler\Salesforce\Responses\Bulk\BulkJobResponse;
 
 class Bulk extends Salesforce
 {
@@ -26,24 +26,32 @@ class Bulk extends Salesforce
         parent::__construct($config);
     }
 
-    public function runBatch($operation, $objectType, $data, $batchSize=2000, $batchTimeout=600, $contentType='JSON', $pollIntervalSeconds=5)
+    public function runBatch($operation, $objectType, $data, $options=[])
     {
         $batches = [];
 
-        $this->log('debug','Bulk::runBatch - STARTED');
+        $defaults =  [
+            'externalIdFieldName' => null,
+            'batchSize' => 2000,
+            'batchTimeout' => 600,
+            'contentType' => 'json',
+            'pollIntervalSeconds' => 5,
+        ];
 
-        $job = $this->createJob($operation, $objectType, $contentType);
+        $options = array_replace($defaults, $options);
+
+        $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType']);
 
         if($job->id) {
-            $totalNumberOfBatches = ceil(count($data) / $batchSize);
+            $totalNumberOfBatches = ceil(count($data) / $options['batchSize']);
 
             for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
-                $batches[] = $this->addBatch($job->id, array_splice($data,($i-1)*$batchSize,$batchSize));
+                $batches[] = $this->addBatch($job->id, array_splice($data,($i-1)*$options['batchSize'],$options['batchSize']));
             }
         }
 
         $time = time();
-        $timeout = $time + $batchTimeout;
+        $timeout = $time + $options['batchTimeout'];
 
         $batches_finished = [];
 
@@ -67,8 +75,8 @@ class Bulk extends Salesforce
             if(count($batches_finished) < count($batches)) {
                 //If the polling for all batches hasn't taken at least the amount of time set for the polling interval, wait the additional time and then continue processing.
                 $wait_time = time() - $last_time_start;
-                if ($wait_time < $pollIntervalSeconds) {
-                    sleep($pollIntervalSeconds - $wait_time);
+                if ($wait_time < $options['pollIntervalSeconds']) {
+                    sleep($options['pollIntervalSeconds'] - $wait_time);
                 }
             }
             $time = time();
@@ -87,20 +95,25 @@ class Bulk extends Salesforce
      * @return BulkJobResponse
      */
 
-    public function createJob($operation, $objectType, $contentType='JSON')
+    public function createJob($operation, $objectType, $externalIdFieldName=null, $contentType='JSON')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
+
         $json_array = [
             'operation' => $operation,
             'object' => $objectType,
-            'contentType' => $contentType,
         ];
+
+        //order of variables matters so this externalIdFieldName has to come before contentType
+        if($operation == 'upsert'){
+            $json_array['externalIdFieldName'] = $externalIdFieldName;
+        }
+
+        $json_array['contentType'] = $contentType;
 
         $result = $this->call_api('post',$url, [
             'json' => $json_array,
         ]);
-
-        $this->log('debug','Bulk::createJob - '.json_encode($result));
 
         if($result && isset($result['id']) && $result['id']){
             return new BulkJobResponse($result);

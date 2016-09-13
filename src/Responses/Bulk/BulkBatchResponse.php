@@ -1,6 +1,8 @@
 <?php
 
-namespace Frankkessler\Salesforce\Responses;
+namespace Frankkessler\Salesforce\Responses\Bulk;
+
+use Frankkessler\Salesforce\Responses\BaseResponse;
 
 class BulkBatchResponse extends BaseResponse
 {

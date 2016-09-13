@@ -123,19 +123,14 @@ class BulkTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
         $operation = 'insert';
         $objectType = 'Account';
         $data = $this->dataArray();
-        $batchSize=2000;
-        $batchTimeout=600;
-        $contentType='json';
-        $pollIntervalSeconds=5;
 
-        $job = $salesforce->bulk()->runBatch($operation, $objectType, $data, $batchSize, $batchTimeout, $contentType, $pollIntervalSeconds);
+        $job = $salesforce->bulk()->runBatch($operation, $objectType, $data);
 
         $this->assertEquals($jobId, $job->id);
 
         foreach($job->batches as $batch){
             $this->assertEquals($batchId, $batch->id);
             foreach($batch->records as $record){
-                var_dump($record);
                 $this->assertEquals($accountCreatedId, $record['id']);
                 $this->assertTrue($record['success']);
                 break;

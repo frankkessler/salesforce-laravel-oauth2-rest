@@ -31,6 +31,11 @@ class BaseResponse implements Arrayable
         return $return;
     }
 
+    /**
+     * __toString implementation for this class
+     *
+     * @return string
+     */
     public function __toString()
     {
         return json_encode($this->toArray());
