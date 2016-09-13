@@ -4,7 +4,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 
-class QueryTest extends \Mockery\Adapter\PHPUnit\MockeryTestCase
+class QueryTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     public function testQuery()
     {
