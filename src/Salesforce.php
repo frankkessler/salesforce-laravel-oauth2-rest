@@ -83,6 +83,9 @@ class Salesforce
     /**
      * Get full sObject (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $id
      * @param $type
      *
@@ -103,6 +106,9 @@ class Salesforce
 
     /**
      * Create sObject (DEPRECATED).
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param string $type
      * @param array  $data
@@ -127,6 +133,9 @@ class Salesforce
     /**
      * Update sObject (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param string $id
      * @param string $type
      * @param array  $data
@@ -149,6 +158,9 @@ class Salesforce
     /**
      * Delete Object (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $id
      * @param $type
      *
@@ -169,6 +181,9 @@ class Salesforce
 
     /**
      * Get Object by External Id (DEPRECATED).
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param $external_field_name
      * @param $external_id
@@ -191,6 +206,9 @@ class Salesforce
 
     /**
      * Upsert an object by an External Id.
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param $external_field_name
      * @param $external_id
@@ -217,6 +235,9 @@ class Salesforce
     /**
      * SOQL Query (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $query
      *
      * @return array
@@ -228,6 +249,9 @@ class Salesforce
 
     /**
      * SOQL Query and follow next URL until all records are gathered (DEPRECATED).
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param $query
      *
@@ -241,6 +265,9 @@ class Salesforce
     /**
      * SOQL Query including deleted records (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $query
      *
      * @return array
@@ -253,6 +280,9 @@ class Salesforce
     /**
      * SOQL Query including deleted records and follow next URL until all records are gathered (DEPRECATED).
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $query
      *
      * @return array
@@ -264,6 +294,9 @@ class Salesforce
 
     /**
      * SOSL Query (DEPRECATED).
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param $query
      *
@@ -278,6 +311,9 @@ class Salesforce
     /**
      * GET request for custom APEX web service endpoint (DEPRECATED.
      *
+     * @deprecated
+     * @codeCoverageIgnore
+     *
      * @param $uri
      *
      * @return mixed
@@ -289,6 +325,9 @@ class Salesforce
 
     /**
      * POST request for custom APEX web service endpoint (DEPRECATED).
+     *
+     * @deprecated
+     * @codeCoverageIgnore
      *
      * @param $uri
      * @param $data
