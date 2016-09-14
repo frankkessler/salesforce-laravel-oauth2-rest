@@ -474,7 +474,7 @@ class Salesforce
 
     protected function log($level, $message)
     {
-        if ($this->config['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['logger'], $level])) {
+        if ($this->config['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['salesforce.logger'], $level])) {
             return call_user_func([$this->config['salesforce.logger'], $level], $message);
         } else {
             return;
