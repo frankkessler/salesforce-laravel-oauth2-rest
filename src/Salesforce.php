@@ -432,7 +432,9 @@ class Salesforce
                 }
             } else {
                 $full_data = json_decode((string) $response->getBody(), true);
-                if (count($full_data) > 1) {
+                if(!is_array($full_data)){
+                    $data = array_merge($data, ['message' => $full_data]);
+                } elseif (count($full_data) > 1) {
                     $data = array_merge($data, $full_data);
                 } else {
                     $data = array_merge($data, current($full_data));

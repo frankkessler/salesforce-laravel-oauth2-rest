@@ -32,6 +32,18 @@ class BaseResponse implements Arrayable
     }
 
     /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArrayAll()
+    {
+        $return = get_object_vars($this);
+
+        return $return;
+    }
+
+    /**
      * __toString implementation for this class.
      *
      * @return string

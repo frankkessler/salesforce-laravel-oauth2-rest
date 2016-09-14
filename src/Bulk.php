@@ -34,7 +34,7 @@ class Bulk extends Salesforce
             'externalIdFieldName' => null,
             'batchSize'           => 2000,
             'batchTimeout'        => 600,
-            'contentType'         => 'json',
+            'contentType'         => 'JSON',
             'pollIntervalSeconds' => 5,
         ];
 
@@ -48,6 +48,8 @@ class Bulk extends Salesforce
             for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
                 $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
             }
+        }else{
+            $this->log('error', 'Job Failed: '.json_encode($job->toArrayAll()));
         }
 
         $time = time();
@@ -115,7 +117,7 @@ class Bulk extends Salesforce
             'json' => $json_array,
         ]);
 
-        if ($result && isset($result['id']) && $result['id']) {
+        if ($result && is_array($result)) {
             return new BulkJobResponse($result);
         }
 
@@ -128,7 +130,7 @@ class Bulk extends Salesforce
 
         $result = $this->call_api('get', $url);
 
-        if ($result && isset($result['id']) && $result['id']) {
+        if ($result && is_array($result)) {
             return new BulkJobResponse($result);
         } else {
             //throw exception
@@ -151,10 +153,10 @@ class Bulk extends Salesforce
         ];
 
         $result = $this->call_api('post', $url, [
-            'json' => json_encode($json_array),
+            'json' => $json_array,
         ]);
 
-        if ($result && isset($result['id']) && $result['id']) {
+        if ($result && is_array($result)) {
             return new BulkJobResponse($result);
         }
 
@@ -183,7 +185,7 @@ class Bulk extends Salesforce
             ],
         ]);
 
-        if ($result) {
+        if ($result && is_array($result)) {
             return new BulkBatchResponse($result);
         }
 
@@ -202,7 +204,7 @@ class Bulk extends Salesforce
 
         $result = $this->call_api('get', $url);
 
-        if ($result && isset($result['id']) && $result['id']) {
+        if ($result && is_array($result)) {
             return new BulkBatchResponse($result);
         } else {
             //throw exception
