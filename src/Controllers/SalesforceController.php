@@ -4,6 +4,7 @@ namespace Frankkessler\Salesforce\Controllers;
 
 use Frankkessler\Salesforce\Authentication;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class SalesforceController extends BaseController
 {

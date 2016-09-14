@@ -10,6 +10,8 @@
     "php": ">=5.5.9",
     "guzzlehttp/guzzle":"~6.0",
     "frankkessler/guzzle-oauth2-plugin":"dev-master",
+    "illuminate/http": "~5.1",
+    "illuminate/routing": "~5.1",
     "illuminate/support": "~5.1",
     "illuminate/database": "~5.1",
     "psr/log": "~1.0"
