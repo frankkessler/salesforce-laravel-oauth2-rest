@@ -48,7 +48,7 @@ class Bulk extends Salesforce
             for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
                 $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
             }
-        }else{
+        } else {
             $this->log('error', 'Job Failed: '.json_encode($job->toArrayAll()));
         }
 
