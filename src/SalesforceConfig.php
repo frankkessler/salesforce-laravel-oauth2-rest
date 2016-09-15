@@ -8,7 +8,7 @@ class SalesforceConfig
 {
     private static $config;
 
-    public static function get($key = null)
+    public static function get($key = null, $default = null)
     {
         if (!self::$config) {
             self::$config = self::getInitialConfig();
@@ -18,6 +18,8 @@ class SalesforceConfig
             return self::$config;
         } elseif (isset(self::$config[$key])) {
             return self::$config[$key];
+        } elseif ($default) {
+            return $default;
         }
 
         return '';
@@ -57,5 +59,10 @@ class SalesforceConfig
         $config = ['salesforce' => $config];
 
         return array_dot($config);
+    }
+
+    public static function reset()
+    {
+        self::$config = [];
     }
 }
