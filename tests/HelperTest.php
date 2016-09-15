@@ -1,8 +1,5 @@
 <?php
 
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
 
 class HelperTest extends \PHPUnit_Framework_TestCase
 {

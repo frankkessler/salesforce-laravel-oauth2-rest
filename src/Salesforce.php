@@ -493,7 +493,7 @@ class Salesforce
 
                 $data = array_merge($debug_info, $data);
 
-                $this->log('error','Salesforce - '.json_encode($data));
+                $this->log('error', 'Salesforce - '.json_encode($data));
             }
 
 
