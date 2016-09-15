@@ -13,7 +13,7 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         parent::setUp();
 
-        $capsule = new Capsule;
+        $capsule = new Capsule();
 
         $capsule->addConnection([
             'driver'   => 'sqlite',
@@ -28,6 +28,7 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $tokenMigration = new CreateSalesforceTokensTable();
         $tokenMigration->up();
     }
+
     public function testEloquentSetRepository()
     {
         $user_id = 1;
@@ -38,8 +39,8 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $data = [
             'refresh_token' => $refreshTokenString,
-            'expires' => $expires,
-            'instance_url' => 'https://na1.salesforce.com',
+            'expires'       => $expires,
+            'instance_url'  => 'https://na1.salesforce.com',
         ];
 
         $accessToken = new CommerceGuys\Guzzle\Oauth2\AccessToken($accessTokenString, 'bearer', $data);
@@ -86,8 +87,8 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $tokenRecord = $repository->getTokenRecord();
 
-        $this->assertEquals("AUTH_TEST_TOKEN", $tokenRecord->access_token);
-        $this->assertEquals("AUTH_TEST_REFRESH_TOKEN", $tokenRecord->refresh_token);
+        $this->assertEquals('AUTH_TEST_TOKEN', $tokenRecord->access_token);
+        $this->assertEquals('AUTH_TEST_REFRESH_TOKEN', $tokenRecord->refresh_token);
     }
 
     public function returnAuthorizationCodeAccessTokenResponse()
