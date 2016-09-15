@@ -18,13 +18,13 @@ class Custom
     {
         $url = 'https://'.SalesforceConfig::get('salesforce.api.domain').'/services/apexrest/'.$uri;
 
-        return $this->rawgetRequest($url);
+        return $this->oauth2Client->rawgetRequest($url);
     }
 
     public function post($uri, $data)
     {
         $url = 'https://'.SalesforceConfig::get('salesforce.api.domain').'/services/apexrest/'.$uri;
 
-        return $this->rawPostRequest($url, $data);
+        return $this->oauth2Client->rawPostRequest($url, $data);
     }
 }
