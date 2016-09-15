@@ -49,6 +49,29 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals('Closed', $job->state);
     }
 
+    public function testBulkJobClose()
+    {
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(200, [], json_encode($this->jobArray(['state' => 'Closed']))),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $jobId = '750D00000004SkVIAU';
+
+        $job = $salesforce->bulk()->closeJob($jobId);
+
+        $this->assertEquals($jobId, $job->id);
+        $this->assertEquals('Closed', $job->state);
+    }
+
     public function testBulkBatchCreate()
     {
         // Create a mock and queue two responses.
