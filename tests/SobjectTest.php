@@ -127,6 +127,55 @@ class SobjectTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals(204, (int) $sobject->http_status_code);
     }
 
+    public function testExternalGet()
+    {
+        $Id = '001D000000IqhSLIAZ';
+
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(200, [], json_encode($this->dataArray([
+                'Id' => $Id,
+            ]))),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $sobject = $salesforce->sobject()->externalGet('External_Field__c', 'EXTERNAL_ID', 'Account');
+
+        $this->assertEquals($Id, $sobject->sobject->Id);
+        $this->assertEquals('Test Account 1', $sobject->sobject->Name);
+        $this->assertTrue($sobject->success);
+        $this->assertEquals(200, (int) $sobject->http_status_code);
+    }
+
+    public function testExternalUpsert()
+    {
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(204, [], ''),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $sobject = $salesforce->sobject()->externalUpsert('External_Field__c', 'EXTERNAL_ID', 'Account', $this->dataArray());
+
+        $this->assertTrue($sobject->success);
+        $this->assertEquals('update', $sobject->operation);
+        $this->assertEquals(204, (int) $sobject->http_status_code);
+    }
+
     public function createSuccessArray($overrides = [])
     {
         return array_replace([
