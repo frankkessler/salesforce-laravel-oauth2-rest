@@ -55,6 +55,30 @@ class SobjectTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals(200, (int) $sobject->http_status_code);
     }
 
+    public function testGetFailure()
+    {
+        $Id = '001D000000IqhSNIAZ';
+
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(404, [], $this->errorReturn()),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $sobject = $salesforce->sobject()->get($Id, 'Account');
+
+        $this->assertEquals('The requested resource does not exist', $sobject->error->message);
+        $this->assertTrue(!$sobject->success);
+        $this->assertEquals(404, (int) $sobject->http_status_code);
+    }
+
     public function testUpdate()
     {
         $Id = '001D000000IqhSLIAZ';
@@ -118,5 +142,10 @@ class SobjectTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             'Name'        => 'Test Account 1',
             'description' => 'Created from Bulk API',
         ], $overrides);
+    }
+
+    public function errorReturn()
+    {
+        return '[{"message":"The requested resource does not exist","errorCode":"NOT_FOUND"}]';
     }
 }

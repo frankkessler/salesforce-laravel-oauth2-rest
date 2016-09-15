@@ -476,6 +476,7 @@ class Salesforce
                 } elseif (count($full_data) > 1) {
                     $data = array_merge($data, $full_data);
                 } else {
+                    $data['raw_sfdc_error'] = (string) $response->getBody();
                     $data = array_merge($data, current($full_data));
                 }
 

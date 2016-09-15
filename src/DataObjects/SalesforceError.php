@@ -21,6 +21,9 @@ class SalesforceError
 
     public function __construct($data)
     {
+        if(count($data) == 1){
+            $data = current($data);
+        }
         $this->fields = isset($data['fields']) ? $data['fields'] : '';
         $this->message = isset($data['message']) ? $data['message'] : '';
         $this->errorCode = isset($data['errorCode']) ? $data['errorCode'] : '';
