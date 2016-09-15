@@ -21,4 +21,14 @@
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>
+    <php>
+        <env name="var_true" value="true"/>
+        <env name="var_false" value="false"/>
+        <env name="var_empty" value="empty"/>
+        <env name="var_null" value="null"/>
+        <env name="var_true_parentheses" value="(true)"/>
+        <env name="var_false_parentheses" value="(false)"/>
+        <env name="var_empty_parentheses" value="(empty)"/>
+        <env name="var_null_parentheses" value="(null)"/>
+    </php>
 </phpunit>
