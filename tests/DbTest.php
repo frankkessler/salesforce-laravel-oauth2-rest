@@ -71,6 +71,9 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         $code = 'AUTHORIZATION_CODE';
 
+        \Frankkessler\Salesforce\SalesforceConfig::set('salesforce.oauth.consumer_token', 'TEST_CLIENT_ID');
+        \Frankkessler\Salesforce\SalesforceConfig::set('salesforce.oauth.consumer_secret', 'TEST_CLIENT_SECRET');
+
         // Create a mock and queue two responses.
         $mock = new MockHandler([
             new Response(200, [], $this->returnAuthorizationCodeAccessTokenResponse()),
