@@ -84,9 +84,9 @@ class QueryTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals(4, count($result->records));
         $this->assertEquals(4, $result->totalSize);
 
-        $i=1;
+        $i = 1;
         foreach ($result->records as $record) {
-            switch($i){
+            switch ($i) {
                 case 1:
                     $this->assertEquals('Test Account', $record['Name']);
                     $this->assertEquals('001D000000IRFmaIAH', $record['Id']);
@@ -132,9 +132,9 @@ class QueryTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals(4, count($result->records));
         $this->assertEquals(4, $result->totalSize);
 
-        $i=1;
+        $i = 1;
         foreach ($result->records as $record) {
-            switch($i){
+            switch ($i) {
                 case 1:
                     $this->assertEquals('Test Account', $record['Name']);
                     $this->assertEquals('001D000000IRFmaIAH', $record['Id']);
