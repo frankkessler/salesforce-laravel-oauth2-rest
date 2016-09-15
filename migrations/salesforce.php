@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Schema\Builder as Schema;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 class CreateSalesforceTokensTable extends Migration
 {
@@ -12,8 +14,17 @@ class CreateSalesforceTokensTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('salesforce_tokens')) {
-            Schema::create('salesforce_tokens', function (Blueprint $table) {
+        if($connection = Capsule::connection($this->getConnection())) {
+            $connection->useDefaultSchemaGrammar();
+        } else {
+            $app = app();
+            $connection = $app['db']->connection($this->getConnection());
+        }
+
+        $schema = new Schema($connection);
+
+        if (!$schema->hasTable('salesforce_tokens')) {
+            $schema->create('salesforce_tokens', function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->string('access_token');
                 $table->string('refresh_token');

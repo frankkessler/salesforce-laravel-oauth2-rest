@@ -24,6 +24,6 @@ class SalesforceController extends BaseController
             die;
         }
 
-        return Authentication::processAuthenicationCode($request->input('code'));
+        return Authentication::processAuthenticationCode($request->input('code'));
     }
 }

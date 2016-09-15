@@ -23,15 +23,15 @@ class Authentication
         return '<a href="'.Utilities::getAuthorizationUrl($service_authorization_url, $oauth_config).'">Login to Salesforce</a>';
     }
 
-    public static function processAuthenicationCode($code)
+    public static function processAuthenticationCode($code, $options = [])
     {
         $repository = new TokenRepository();
 
         $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
 
-        $oauth2Client = new Oauth2Client([
+        $oauth2Client = new Oauth2Client(array_replace([
             'base_uri' => $base_uri,
-        ]);
+        ], $options));
 
         $authorization_config = [
             'code'          => $code,
