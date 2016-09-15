@@ -35,9 +35,10 @@ class Salesforce
 
     public function __construct($config = null)
     {
-        $this->config = $config;
         //Allow custom config to be applied through the constructor
         SalesforceConfig::setInitialConfig($config);
+
+        $this->config = SalesforceConfig::get();
 
         $this->repository = new TokenRepository();
 
@@ -491,6 +492,8 @@ class Salesforce
                 $data['success'] = false;
 
                 $data = array_merge($debug_info, $data);
+
+                $this->log('error','Salesforce - '.json_encode($data));
             }
 
 

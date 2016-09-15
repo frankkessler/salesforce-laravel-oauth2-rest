@@ -79,7 +79,8 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $auth = new \Frankkessler\Salesforce\Authentication();
-        $result = $auth->processAuthenticationCode($code, $options = ['handler' => $handler]);
+        $options = ['handler' => $handler];
+        $result = $auth->processAuthenticationCode($code, $options);
 
         $this->assertEquals('Token record set successfully', $result);
 
