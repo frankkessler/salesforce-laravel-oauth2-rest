@@ -37,14 +37,24 @@ class BulkClient extends Oauth2Client
      *
      * @return HandlerStack|null
      */
-    protected function returnHandlers()
+    public function returnHandlers()
     {
         // Create a handler stack that has all of the default middlewares attached
         $handler = HandlerStack::create();
 
         //Add the Authorization header to requests.
-        $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
+        $handler->push($this->mapRequest(), 'add_auth_header');
+
+        $handler->before('add_auth_header', $this->modifyRequest());
+
+        return $handler;
+    }
+
+    public function mapRequest()
+    {
+        return  Middleware::mapRequest(function (RequestInterface $request) {
             if ($this->getConfig('auth') == 'bulk') {
+
                 $token = $this->getAccessToken();
 
                 if ($token !== null) {
@@ -55,20 +65,23 @@ class BulkClient extends Oauth2Client
             }
 
             return $request;
-        }), 'add_auth_header');
+        });
+    }
 
-        $handler->before('add_auth_header', $this->retry_modify_request(function ($retries, RequestInterface $request, ResponseInterface $response = null, $error = null) {
-            if ($retries > 0) {
-                return false;
-            }
-            if ($response instanceof ResponseInterface) {
-                if ($response->getStatusCode() == 401) {
-                    return true;
+    public function modifyRequest()
+    {
+        return $this->retry_modify_request(function ($retries, RequestInterface $request, ResponseInterface $response = null, $error = null) {
+                if ($retries > 0) {
+                    return false;
                 }
-            }
+                if ($response instanceof ResponseInterface) {
+                    if ($response->getStatusCode() == 401) {
+                        return true;
+                    }
+                }
 
-            return false;
-        },
+                return false;
+            },
             function (RequestInterface $request, ResponseInterface $response) {
                 if ($response instanceof ResponseInterface) {
                     if ($response->getStatusCode() == 401) {
@@ -83,8 +96,6 @@ class BulkClient extends Oauth2Client
 
                 return $request;
             }
-        ));
-
-        return $handler;
+        );
     }
 }
