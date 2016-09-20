@@ -2,8 +2,6 @@
 
 namespace Frankkessler\Salesforce\Client;
 
-use CommerceGuys\Guzzle\Oauth2\GrantType\GrantTypeInterface;
-use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshTokenGrantTypeInterface;
 use CommerceGuys\Guzzle\Oauth2\Oauth2Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -44,7 +42,6 @@ class BulkClient extends Oauth2Client
     {
         return  Middleware::mapRequest(function (RequestInterface $request) {
             if ($this->getConfig('auth') == 'bulk') {
-
                 $token = $this->getAccessToken();
 
                 if ($token !== null) {
@@ -61,17 +58,17 @@ class BulkClient extends Oauth2Client
     public function modifyRequest()
     {
         return $this->retry_modify_request(function ($retries, RequestInterface $request, ResponseInterface $response = null, $error = null) {
-                if ($retries > 0) {
-                    return false;
-                }
-                if ($response instanceof ResponseInterface) {
-                    if ($response->getStatusCode() == 401) {
-                        return true;
-                    }
-                }
-
+            if ($retries > 0) {
                 return false;
-            },
+            }
+            if ($response instanceof ResponseInterface) {
+                if ($response->getStatusCode() == 401) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
             function (RequestInterface $request, ResponseInterface $response) {
                 if ($response instanceof ResponseInterface) {
                     if ($response->getStatusCode() == 401) {

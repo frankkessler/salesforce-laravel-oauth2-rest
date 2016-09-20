@@ -42,9 +42,9 @@ class Salesforce
 
         $this->repository = new TokenRepository();
 
-        if(isset($this->config_local['base_uri'])){
+        if (isset($this->config_local['base_uri'])) {
             $base_uri = $this->config_local['base_uri'];
-        }else{
+        } else {
             $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
         }
 
@@ -81,9 +81,9 @@ class Salesforce
         $this->oauth2Client->setAccessToken($access_token, $access_token_type = 'Bearer');
         $this->oauth2Client->setRefreshToken($refresh_token);
 
-        if(isset($this->config_local['token_url'])){
+        if (isset($this->config_local['token_url'])) {
             $token_url = $this->config_local['token_url'];
-        }else{
+        } else {
             $token_url = 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri');
         }
 
@@ -509,7 +509,7 @@ class Salesforce
 
                 $data = array_merge($debug_info, $data);
 
-                $this->log('error','Salesforce - '.json_encode($data));
+                $this->log('error', 'Salesforce - '.json_encode($data));
             }
 
 
