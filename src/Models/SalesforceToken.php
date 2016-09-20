@@ -6,17 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $access_token
  * @property string $refresh_token
  * @property string $instance_base_url
- * @property integer $user_id
+ * @property int $user_id
  * @property \DateTime $expires
  * @property \DateTime $created_at
  * @property \DateTime $updated_at
  * @property \DateTime $deleted_at
  */
-
 class SalesforceToken extends Model
 {
     use SoftDeletes;
