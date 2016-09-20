@@ -27,7 +27,8 @@ class GuzzleServer
     public static $port = 8126;
 
     /**
-     * Flush the received requests from the server
+     * Flush the received requests from the server.
+     *
      * @throws \RuntimeException
      */
     public static function flush()
@@ -43,6 +44,7 @@ class GuzzleServer
      *
      * @param array|ResponseInterface $responses A single or array of Responses
      *                                           to queue.
+     *
      * @throws \Exception
      */
     public static function enqueue($responses)
@@ -60,20 +62,21 @@ class GuzzleServer
                 'status'  => (string) $response->getStatusCode(),
                 'reason'  => $response->getReasonPhrase(),
                 'headers' => $headers,
-                'body'    => base64_encode((string) $response->getBody())
+                'body'    => base64_encode((string) $response->getBody()),
             ];
         }
 
         self::getClient()->request('PUT', 'guzzle-server/responses', [
-            'json' => $data
+            'json' => $data,
         ]);
     }
 
     /**
-     * Get all of the received requests
+     * Get all of the received requests.
+     *
+     * @throws \RuntimeException
      *
      * @return ResponseInterface[]
-     * @throws \RuntimeException
      */
     public static function received()
     {
@@ -88,7 +91,7 @@ class GuzzleServer
             function ($message) {
                 $uri = $message['uri'];
                 if (isset($message['query_string'])) {
-                    $uri .= '?' . $message['query_string'];
+                    $uri .= '?'.$message['query_string'];
                 }
                 $response = new Psr7\Request(
                     $message['http_method'],
@@ -97,6 +100,7 @@ class GuzzleServer
                     $message['body'],
                     $message['version']
                 );
+
                 return $response->withUri(
                     $response->getUri()
                         ->withScheme('http')
@@ -108,7 +112,7 @@ class GuzzleServer
     }
 
     /**
-     * Stop running the node.js server
+     * Stop running the node.js server.
      */
     public static function stop()
     {
@@ -138,8 +142,8 @@ class GuzzleServer
         }
 
         if (!self::isListening()) {
-            exec('node ' . __DIR__ . '/server.js '
-                . self::$port . ' >> /tmp/server.log 2>&1 &');
+            exec('node '.__DIR__.'/server.js '
+                .self::$port.' >> /tmp/server.log 2>&1 &');
             self::wait();
         }
 
@@ -151,8 +155,9 @@ class GuzzleServer
         try {
             self::getClient()->request('GET', 'guzzle-server/perf', [
                 'connect_timeout' => 5,
-                'timeout'         => 5
+                'timeout'         => 5,
             ]);
+
             return true;
         } catch (\Exception $e) {
             return false;

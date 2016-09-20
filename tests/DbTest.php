@@ -117,22 +117,22 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $job = $salesforce->bulk()->createJob('insert', 'Account');
 
-        $i=1;
-        foreach(GuzzleServer::received() as $response){
-            $request_body = (string)$response->getBody();
-            switch($i){
+        $i = 1;
+        foreach (GuzzleServer::received() as $response) {
+            $request_body = (string) $response->getBody();
+            switch ($i) {
                 case 1:
                 case 3:
-                    $data = json_decode($request_body,true);
-                    $this->assertEquals('insert',$data['operation']);
-                    $this->assertEquals('Account',$data['object']);
+                    $data = json_decode($request_body, true);
+                    $this->assertEquals('insert', $data['operation']);
+                    $this->assertEquals('Account', $data['object']);
                     break;
                 case 2:
-                    $this->assertTrue((bool)strpos($request_body, 'refresh_token=TEST'));
+                    $this->assertTrue((bool) strpos($request_body, 'refresh_token=TEST'));
                     break;
                 default:
                     //this should never be called.  If it is something went wrong.
-                    $this->assertEquals(0,$response->getStatusCode());
+                    $this->assertEquals(0, $response->getStatusCode());
             }
             $i++;
         }
@@ -196,5 +196,4 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             'totalProcessingTime'     => 0,
         ], $overrides);
     }
-
 }
