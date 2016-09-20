@@ -35,11 +35,10 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $accessTokenString = 'TEST_TOKEN';
         $refreshTokenString = 'TEST_REFRESH_TOKEN';
-        $expires = 1473913598;
 
         $data = [
             'refresh_token' => $refreshTokenString,
-            'expires'       => $expires,
+            'expires'       => null,
             'instance_url'  => 'https://na1.salesforce.com',
         ];
 
@@ -82,7 +81,7 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $handler = HandlerStack::create($mock);
 
         $auth = new \Frankkessler\Salesforce\Authentication();
-        $options = ['handler' => $handler];
+        $options = ['token_handler' => $handler];
         $result = $auth->processAuthenticationCode($code, $options);
 
         $this->assertEquals('Token record set successfully', $result);
@@ -95,17 +94,16 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals('AUTH_TEST_REFRESH_TOKEN', $tokenRecord->refresh_token);
     }
 
-    public function testBulkJobCreateWithMiddlewar2()
+    public function testBulkJobCreateWithMiddleware()
     {
-        $bulkTest = new BulkTest();
-
-        GuzzleServer::start();
+        \Frankkessler\Salesforce\SalesforceConfig::reset();
         GuzzleServer::flush();
+        GuzzleServer::start();
 
         GuzzleServer::enqueue([
             new Response(401, [], $this->returnInvalidGrant()),
-            new Response(200, [], $this->returnAuthorizationCodeAccessTokenResponse()),
-            new Response(201, [], json_encode($bulkTest->jobArray())),
+            new Response(200, [], $this->returnRefreshTokenResponse()),
+            new Response(201, [], json_encode($this->jobArray())),
         ]);
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
@@ -122,7 +120,6 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $i=1;
         foreach(GuzzleServer::received() as $response){
             $request_body = (string)$response->getBody();
-            var_dump($request_body);
             switch($i){
                 case 1:
                 case 3:
@@ -140,9 +137,9 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             $i++;
         }
 
-        GuzzleServer::flush();
-
         $this->assertEquals('750D00000004SkVIAU', $job->id);
+
+        GuzzleServer::flush();
     }
 
     public function returnInvalidGrant()
@@ -153,7 +150,18 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     public function returnAuthorizationCodeAccessTokenResponse()
     {
         return
-        '{
+            '{
+            "access_token": "AUTH_TEST_TOKEN",
+            "refresh_token": "AUTH_TEST_REFRESH_TOKEN",
+            "instance_url": "https://na1.salesforce.com",
+            "token_type": "bearer"
+        }';
+    }
+
+    public function returnRefreshTokenResponse()
+    {
+        return
+            '{
             "id":"https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",
             "issued_at":"1278448384422",
             "instance_url":"https://na1.salesforce.com/",
@@ -161,4 +169,32 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             "access_token":"00Dx0000000BV7z!AR8AQP0jITN80ESEsj5EbaZTFG0RNBaT1cyWk7TrqoDjoNIWQ2ME_sTZzBjfmOE6zMHq6y8PIW4eWze9JksNEkWUl.Cju7m4"
         }';
     }
+
+    public function jobArray($overrides = [])
+    {
+        return array_replace([
+            'apexProcessingTime'      => 0,
+            'apiActiveProcessingTime' => 0,
+            'apiVersion'              => 36.0,
+            'concurrencyMode'         => 'Parallel',
+            'contentType'             => 'JSON',
+            'createdById'             => '005D0000001b0fFIAQ',
+            'createdDate'             => '2015-12-15T20:45:25.000+0000',
+            'id'                      => '750D00000004SkVIAU',
+            'numberBatchesCompleted'  => 0,
+            'numberBatchesFailed'     => 0,
+            'numberBatchesInProgress' => 0,
+            'numberBatchesQueued'     => 0,
+            'numberBatchesTotal'      => 0,
+            'numberRecordsFailed'     => 0,
+            'numberRecordsProcessed'  => 0,
+            'numberRetries'           => 0,
+            'object'                  => 'Account',
+            'operation'               => 'insert',
+            'state'                   => 'Open',
+            'systemModstamp'          => '2015-12-15T20:45:25.000+0000',
+            'totalProcessingTime'     => 0,
+        ], $overrides);
+    }
+
 }
