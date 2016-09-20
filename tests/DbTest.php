@@ -95,15 +95,70 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals('AUTH_TEST_REFRESH_TOKEN', $tokenRecord->refresh_token);
     }
 
+    public function testBulkJobCreateWithMiddlewar2()
+    {
+        $bulkTest = new BulkTest();
+
+        GuzzleServer::start();
+        GuzzleServer::flush();
+
+        GuzzleServer::enqueue([
+            new Response(401, [], $this->returnInvalidGrant()),
+            new Response(200, [], $this->returnAuthorizationCodeAccessTokenResponse()),
+            new Response(201, [], json_encode($bulkTest->jobArray())),
+        ]);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+            'auth'                           => 'bulk',
+            'base_uri'                       => GuzzleServer::$url,
+            'bulk_base_uri'                  => GuzzleServer::$url,
+            'token_url'                      => GuzzleServer::$url,
+        ]);
+
+        $job = $salesforce->bulk()->createJob('insert', 'Account');
+
+        $i=1;
+        foreach(GuzzleServer::received() as $response){
+            $request_body = (string)$response->getBody();
+            var_dump($request_body);
+            switch($i){
+                case 1:
+                case 3:
+                    $data = json_decode($request_body,true);
+                    $this->assertEquals('insert',$data['operation']);
+                    $this->assertEquals('Account',$data['object']);
+                    break;
+                case 2:
+                    $this->assertTrue((bool)strpos($request_body, 'refresh_token=TEST'));
+                    break;
+                default:
+                    //this should never be called.  If it is something went wrong.
+                    $this->assertEquals(0,$response->getStatusCode());
+            }
+            $i++;
+        }
+
+        GuzzleServer::flush();
+
+        $this->assertEquals('750D00000004SkVIAU', $job->id);
+    }
+
+    public function returnInvalidGrant()
+    {
+        return '[{"message":"Authentication failure","errorCode":"invalid_grant"}]';
+    }
+
     public function returnAuthorizationCodeAccessTokenResponse()
     {
         return
         '{
-            "access_token": "AUTH_TEST_TOKEN",
-            "refresh_token": "AUTH_TEST_REFRESH_TOKEN",
-            "instance_url": "https://na1.salesforce.com",
-            "expires": 1473913598,
-            "token_type": "bearer"
+            "id":"https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",
+            "issued_at":"1278448384422",
+            "instance_url":"https://na1.salesforce.com/",
+            "signature":"SSSbLO/gBhmmyNUvN18ODBDFYHzakxOMgqYtu+hDPsc=",
+            "access_token":"00Dx0000000BV7z!AR8AQP0jITN80ESEsj5EbaZTFG0RNBaT1cyWk7TrqoDjoNIWQ2ME_sTZzBjfmOE6zMHq6y8PIW4eWze9JksNEkWUl.Cju7m4"
         }';
     }
 }

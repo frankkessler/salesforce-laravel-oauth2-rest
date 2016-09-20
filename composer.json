@@ -38,5 +38,10 @@
     "files": [
       "src/helpers.php"
     ]
+  },
+  "autoload-dev": {
+    "files": [
+      "tests/GuzzleServer.php"
+    ]
   }
 }

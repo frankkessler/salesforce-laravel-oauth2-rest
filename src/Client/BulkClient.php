@@ -13,16 +13,6 @@ use Psr\Http\Message\ResponseInterface;
 
 class BulkClient extends Oauth2Client
 {
-    /** @var AccessToken|null */
-    protected $accessToken;
-    /** @var AccessToken|null */
-    protected $refreshToken;
-
-    /** @var GrantTypeInterface */
-    protected $grantType;
-    /** @var RefreshTokenGrantTypeInterface */
-    protected $refreshTokenGrantType;
-
     public function __construct($config = [])
     {
         if (!isset($config['handler'])) {

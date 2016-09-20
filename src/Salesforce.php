@@ -11,7 +11,7 @@ class Salesforce
 {
     public $oauth2Client;
 
-    protected $config;
+    protected $config_local;
 
     /**
      * @var Sobject
@@ -38,11 +38,15 @@ class Salesforce
         //Allow custom config to be applied through the constructor
         SalesforceConfig::setInitialConfig($config);
 
-        $this->config = SalesforceConfig::get();
+        $this->config_local = SalesforceConfig::get();
 
         $this->repository = new TokenRepository();
 
-        $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
+        if(isset($this->config_local['base_uri'])){
+            $base_uri = $this->config_local['base_uri'];
+        }else{
+            $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain').SalesforceConfig::get('salesforce.api.base_uri');
+        }
 
         $client_config = [
             'base_uri' => $base_uri,
@@ -50,19 +54,24 @@ class Salesforce
         ];
 
         //allow for override of default oauth2 handler
-        if (isset($config['handler'])) {
-            $client_config['handler'] = $config['handler'];
+        if (isset($this->config_local['handler'])) {
+            $client_config['handler'] = $this->config_local['handler'];
         }
 
         if (!$this->oauth2Client) {
             $this->oauth2Client = new Oauth2Client($client_config);
         }
 
+        $this->setupOauthClient();
+    }
+
+    public function setupOauthClient()
+    {
         //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
         if (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')) {
-            $this->token_record = $this->repository->store->getTokenRecord();
-            SalesforceConfig::set('salesforce.oauth.access_token', $this->token_record->access_token);
-            SalesforceConfig::set('salesforce.oauth.refresh_token', $this->token_record->refresh_token);
+            $token_record = $this->repository->store->getTokenRecord();
+            SalesforceConfig::set('salesforce.oauth.access_token', $token_record->access_token);
+            SalesforceConfig::set('salesforce.oauth.refresh_token', $token_record->refresh_token);
         }
 
         $access_token = SalesforceConfig::get('salesforce.oauth.access_token');
@@ -71,11 +80,18 @@ class Salesforce
         //Set access token and refresh token in Guzzle oauth client
         $this->oauth2Client->setAccessToken($access_token, $access_token_type = 'Bearer');
         $this->oauth2Client->setRefreshToken($refresh_token);
+
+        if(isset($this->config_local['token_url'])){
+            $token_url = $this->config_local['token_url'];
+        }else{
+            $token_url = 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri');
+        }
+
         $refresh_token_config = [
             'client_id'     => SalesforceConfig::get('salesforce.oauth.consumer_token'),
             'client_secret' => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
             'refresh_token' => $refresh_token,
-            'token_url'     => 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri'),
+            'token_url'     => $token_url,
             'auth_location' => 'body',
         ];
         $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
@@ -403,7 +419,7 @@ class Salesforce
     public function bulk()
     {
         if (!$this->bulk_api) {
-            $this->bulk_api = new Bulk($this->config);
+            $this->bulk_api = new Bulk($this->config_local);
         }
 
         return $this->bulk_api;
@@ -519,8 +535,8 @@ class Salesforce
 
     protected function log($level, $message)
     {
-        if ($this->config['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config['salesforce.logger'], $level])) {
-            return call_user_func([$this->config['salesforce.logger'], $level], $message);
+        if ($this->config_local['salesforce.logger'] instanceof \Psr\Log\LoggerInterface && is_callable([$this->config_local['salesforce.logger'], $level])) {
+            return call_user_func([$this->config_local['salesforce.logger'], $level], $message);
         } else {
             return;
         }

@@ -10,34 +10,10 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         // Create a mock and queue two responses.
         $mock = new MockHandler([
-            new Response(200, [], json_encode($this->jobArray())),
+            new Response(201, [], json_encode($this->jobArray())),
         ]);
 
         $handler = HandlerStack::create($mock);
-
-        $salesforce = new \Frankkessler\Salesforce\Salesforce([
-            'handler'                        => $handler,
-            'salesforce.oauth.access_token'  => 'TEST',
-            'salesforce.oauth.refresh_token' => 'TEST',
-        ]);
-
-        $job = $salesforce->bulk()->createJob('insert', 'Account');
-
-        $this->assertEquals('750D00000004SkVIAU', $job->id);
-    }
-
-    public function testBulkJobCreateWithMiddleware()
-    {
-        // Create a mock and queue two responses.
-        $mock = new MockHandler([
-            new Response(200, [], json_encode($this->jobArray())),
-        ]);
-
-        $bulk_client = new \Frankkessler\Salesforce\Client\BulkClient();
-        $handler = HandlerStack::create($mock);
-        $handler->push($bulk_client->mapRequest(), 'add_auth_header');
-
-        $handler->before('add_auth_header', $bulk_client->modifyRequest());
 
         $salesforce = new \Frankkessler\Salesforce\Salesforce([
             'handler'                        => $handler,

@@ -11,7 +11,11 @@ class Bulk extends Salesforce
 {
     public function __construct($config = [])
     {
-        $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain');
+        if(isset($config['bulk_base_uri'])){
+            $base_uri = $config['bulk_base_uri'];
+        }else{
+            $base_uri = 'https://'.SalesforceConfig::get('salesforce.api.domain');
+        }
 
         $client_config = [
             'base_uri' => $base_uri,
@@ -23,7 +27,9 @@ class Bulk extends Salesforce
         }
 
         $this->oauth2Client = new BulkClient($client_config);
-        parent::__construct($config);
+
+        parent::__construct(array_replace($config, $client_config));
+
     }
 
     public function runBatch($operation, $objectType, $data, $options = [])

@@ -6,10 +6,13 @@ php:
   - hhvm
   - nightly
 before_script:
+  - curl --version
   - composer self-update
   - composer install
+  - ~/.nvm/nvm.sh install v0.6.14
+  - ~/.nvm/nvm.sh run v0.6.14
 script:
   - mkdir -p build/logs
-  - php vendor/bin/phpunit
+  - make test
 after_success:
   - travis_retry php vendor/bin/coveralls
