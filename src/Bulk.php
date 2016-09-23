@@ -41,17 +41,27 @@ class Bulk extends Salesforce
             'batchTimeout'        => 600,
             'contentType'         => 'JSON',
             'pollIntervalSeconds' => 5,
+            'isBatchedResult'     => false,
         ];
 
         $options = array_replace($defaults, $options);
 
+        if($operation == 'query'){
+            $options['isBatchedResult'] = true;
+        }
+
         $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType']);
 
         if ($job->id) {
-            $totalNumberOfBatches = ceil(count($data) / $options['batchSize']);
+            //if data is array, we can split it into batches
+            if(is_array($data)) {
+                $totalNumberOfBatches = ceil(count($data) / $options['batchSize']);
 
-            for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
-                $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
+                for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
+                    $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
+                }
+            }else{ //probably a string query so run in onee batch
+                $batches[] = $this->addBatch($job->id, $data);
             }
         } else {
             $this->log('error', 'Job Failed: '.json_encode($job->toArrayAll()));
@@ -72,7 +82,7 @@ class Bulk extends Salesforce
 
                 $batch = $this->batchDetails($job->id, $batch->id);
                 if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed'])) {
-                    $batchResult = $this->batchResult($job->id, $batch->id);
+                    $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult']);
                     $batch->records = $batchResult->records;
                     $batches_finished[] = $batch->id;
                 }
@@ -89,7 +99,7 @@ class Bulk extends Salesforce
             $time = time();
         }
 
-        $job = $this->jobDetails($job->id);
+        $job = $this->closeJob($job->id);
         $job->batches = $batches;
 
         return $job;
@@ -183,11 +193,20 @@ class Bulk extends Salesforce
 
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch';
 
-        $result = $this->call_api('post', $url, [
-            'body'    => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK),
-            'headers' => [
+        $headers = [];
+        //json_encode any arrays to send over to bulk api
+        if(is_array($data)){
+            $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
+            $headers = [
                 'Content-type' => 'application/json',
-            ],
+            ];
+        }else{
+            $body = $data;
+        }
+
+        $result = $this->call_api('post', $url, [
+            'body'    => $body,
+            'headers' => $headers,
         ]);
 
         if ($result && is_array($result)) {
@@ -224,7 +243,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResultResponse
      */
-    public function batchResult($jobId, $batchId)
+    public function batchResult($jobId, $batchId, $isBatchedResult=false, $resultId=null)
     {
         if (!$jobId || !$batchId) {
             //throw exception
@@ -233,16 +252,35 @@ class Bulk extends Salesforce
 
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId.'/result';
 
+        //if this is a query result, the main result page will have an array of result ids to follow for hte query results
+        if($resultId){
+            $url = $url.'/'.$resultId;
+        }
+
         $result = $this->call_api('get', $url);
 
         if ($result && is_array($result)) {
-            //maximum amount of batch records allowed it 10,000
+
+            //initialize array for records to be used later
+            if(!isset($result['records']) || !is_array($result['records'])){
+                $result['records'] = [];
+            }
+
+            //maximum amount of batch records allowed is 10,000
             for ($i = 0; $i < 10000; $i++) {
                 //skip processing for the rest of the records if they don't exist
                 if (!isset($result[$i])) {
                     break;
                 }
-                $result['records'][$i] = $result[$i];
+
+                //batched results return a list of result ids that need to be processed to get the actual data
+                if($isBatchedResult){
+                    $batchResult = $this->batchResult($jobId, $batchId, false, $result[$i]);
+                    $result['records'] = array_merge($result['records'], $batchResult->records);
+                }else{
+                    $result['records'][$i] = $result[$i];
+                }
+
                 unset($result[$i]);
             }
 
