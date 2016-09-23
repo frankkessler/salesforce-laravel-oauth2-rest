@@ -160,7 +160,7 @@ if($result->success && $result->totalSize > 0){
 
 $soql = 'SELECT Id, Name FROM Account LIMIT 1';
 
-$result = Salesforce::queryFollowNext($soql);
+$result = Salesforce::query()->queryFollowNext($soql);
 
 if($result->success && $result->totalSize > 0){
     foreach($result->records as $record){
@@ -174,7 +174,7 @@ if($result->success && $result->totalSize > 0){
 ```php
 $sosl = 'FIND {Acme} IN ALL FIELDS RETURNING Account(Id, Name ORDER BY LastModifiedDate DESC LIMIT 3)'; 
 
-$result = Salesforce::search($sosl);
+$result = Salesforce::query()->search($sosl);
 
 if($result->success && $result->totalSize > 0){
     foreach($result->records as $record){
