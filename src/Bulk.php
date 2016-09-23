@@ -42,6 +42,7 @@ class Bulk extends Salesforce
             'contentType'         => 'JSON',
             'pollIntervalSeconds' => 5,
             'isBatchedResult'     => false,
+            'concurrencyMode'     => 'Parallel',
         ];
 
         $options = array_replace($defaults, $options);
@@ -50,7 +51,7 @@ class Bulk extends Salesforce
             $options['isBatchedResult'] = true;
         }
 
-        $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType']);
+        $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType'], $options['concurrencyMode']);
 
         if ($job->id) {
             //if data is array, we can split it into batches
@@ -112,13 +113,14 @@ class Bulk extends Salesforce
      *
      * @return BulkJobResponse
      */
-    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON')
+    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode='Parallel')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
 
         $json_array = [
-            'operation' => $operation,
-            'object'    => $objectType,
+            'operation'       => $operation,
+            'object'          => $objectType,
+            'concurrencyMode' => $concurrencyMode,
         ];
 
         //order of variables matters so this externalIdFieldName has to come before contentType
