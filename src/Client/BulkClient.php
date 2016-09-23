@@ -2,7 +2,7 @@
 
 namespace Frankkessler\Salesforce\Client;
 
-use CommerceGuys\Guzzle\Oauth2\Oauth2Client;
+use Frankkessler\Guzzle\Oauth2\Oauth2Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7;

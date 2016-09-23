@@ -42,7 +42,7 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             'instance_url'  => 'https://na1.salesforce.com',
         ];
 
-        $accessToken = new CommerceGuys\Guzzle\Oauth2\AccessToken($accessTokenString, 'bearer', $data);
+        $accessToken = new Frankkessler\Guzzle\Oauth2\AccessToken($accessTokenString, 'bearer', $data);
 
         $repository = new \Frankkessler\Salesforce\Repositories\Eloquent\TokenEloquentRepository();
         $repository->setTokenRecord($accessToken, $user_id);

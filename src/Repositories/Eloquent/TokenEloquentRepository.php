@@ -2,7 +2,7 @@
 
 namespace Frankkessler\Salesforce\Repositories\Eloquent;
 
-use CommerceGuys\Guzzle\Oauth2\AccessToken;
+use Frankkessler\Guzzle\Oauth2\AccessToken;
 use Frankkessler\Salesforce\Models\SalesforceToken;
 use Frankkessler\Salesforce\Repositories\TokenRepositoryInterface;
 use Frankkessler\Salesforce\SalesforceConfig;

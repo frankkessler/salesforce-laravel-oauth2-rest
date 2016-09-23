@@ -2,7 +2,7 @@
 
 namespace Frankkessler\Salesforce\Repositories;
 
-use CommerceGuys\Guzzle\Oauth2\AccessToken;
+use Frankkessler\Guzzle\Oauth2\AccessToken;
 
 interface TokenRepositoryInterface
 {

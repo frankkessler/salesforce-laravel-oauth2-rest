@@ -2,8 +2,8 @@
 
 namespace Frankkessler\Salesforce;
 
-use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
-use CommerceGuys\Guzzle\Oauth2\Oauth2Client;
+use Frankkessler\Guzzle\Oauth2\GrantType\RefreshToken;
+use Frankkessler\Guzzle\Oauth2\Oauth2Client;
 use Exception;
 use Frankkessler\Salesforce\Repositories\TokenRepository;
 
