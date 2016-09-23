@@ -113,7 +113,7 @@ class Bulk extends Salesforce
      *
      * @return BulkJobResponse
      */
-    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode='Parallel')
+    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode = 'Parallel')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
 
