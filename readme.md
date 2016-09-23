@@ -185,6 +185,8 @@ if($result->success && $result->totalSize > 0){
 
 ## Bulk Api Processing
 
+### Insert
+
 ```php
 $operationType = 'insert';
 $objectType = 'Account';
@@ -203,5 +205,24 @@ $result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData)
 
 if($result->success){
     $id = $result->id;
+}
+```
+
+### Query
+
+```php
+$operationType = 'query';
+$objectType = 'Account';
+$objectData = 'SELECT Id, Name FROM Account LIMIT 10';
+
+$result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData);
+
+if ($result->success) {
+    $id = $result->id;
+    foreach ($result->batches as $batch) {
+        foreach ($batch->records as $record) {
+            $account_id = $record['Id'];
+        }
+    }
 }
 ```
