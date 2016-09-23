@@ -47,7 +47,7 @@ class Bulk extends Salesforce
 
         $options = array_replace($defaults, $options);
 
-        if($operation == 'query'){
+        if ($operation == 'query') {
             $options['isBatchedResult'] = true;
         }
 
@@ -55,13 +55,13 @@ class Bulk extends Salesforce
 
         if ($job->id) {
             //if data is array, we can split it into batches
-            if(is_array($data)) {
+            if (is_array($data)) {
                 $totalNumberOfBatches = ceil(count($data) / $options['batchSize']);
 
                 for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
                     $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
                 }
-            }else{ //probably a string query so run in onee batch
+            } else { //probably a string query so run in onee batch
                 $batches[] = $this->addBatch($job->id, $data);
             }
         } else {
@@ -197,12 +197,12 @@ class Bulk extends Salesforce
 
         $headers = [];
         //json_encode any arrays to send over to bulk api
-        if(is_array($data)){
+        if (is_array($data)) {
             $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
             $headers = [
                 'Content-type' => 'application/json',
             ];
-        }else{
+        } else {
             $body = $data;
         }
 
@@ -245,7 +245,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResultResponse
      */
-    public function batchResult($jobId, $batchId, $isBatchedResult=false, $resultId=null)
+    public function batchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null)
     {
         if (!$jobId || !$batchId) {
             //throw exception
@@ -255,7 +255,7 @@ class Bulk extends Salesforce
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId.'/result';
 
         //if this is a query result, the main result page will have an array of result ids to follow for hte query results
-        if($resultId){
+        if ($resultId) {
             $url = $url.'/'.$resultId;
         }
 
@@ -264,7 +264,7 @@ class Bulk extends Salesforce
         if ($result && is_array($result)) {
 
             //initialize array for records to be used later
-            if(!isset($result['records']) || !is_array($result['records'])){
+            if (!isset($result['records']) || !is_array($result['records'])) {
                 $result['records'] = [];
             }
 
@@ -276,10 +276,10 @@ class Bulk extends Salesforce
                 }
 
                 //batched results return a list of result ids that need to be processed to get the actual data
-                if($isBatchedResult){
+                if ($isBatchedResult) {
                     $batchResult = $this->batchResult($jobId, $batchId, false, $result[$i]);
                     $result['records'] = array_merge($result['records'], $batchResult->records);
-                }else{
+                } else {
                     $result['records'][$i] = $result[$i];
                 }
 
