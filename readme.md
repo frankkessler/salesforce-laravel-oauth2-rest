@@ -219,7 +219,7 @@ $objectData = [
 
 $result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData);
 
-if($result->success){
+if($result->id){
     $id = $result->id;
 }
 ```
@@ -233,7 +233,7 @@ $objectData = 'SELECT Id, Name FROM Account LIMIT 10';
 
 $result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData);
 
-if ($result->success) {
+if ($result->id) {
     $id = $result->id;
     foreach ($result->batches as $batch) {
         foreach ($batch->records as $record) {
