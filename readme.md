@@ -6,6 +6,22 @@
 # API CHANGES
 There are major breaking changes between the 0.3 branch and the 0.4 branch.  Keep in mind that this package IS NOT yet stable.
 
+# RUNNING UNIT TESTS
+
+There are currently two ways to run the unit tests.  Keep in mind that node is a dependency for running the unit tests regardless of which way you want to run them.
+1. If you have make installed you can run 
+```
+make tests
+```
+2. If you would prefer to see more details about how the unit tests run, you can start the node server and then run the unit tests from another window.
+```
+node tests/server.js 8126 true
+```
+Then in a different window:
+```
+vendor/bin/phpunit
+```
+
 # INSTALLATION
 
 To install this package, add the following to your composer.json file
