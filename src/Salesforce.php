@@ -112,7 +112,9 @@ class Salesforce
     {
         $result = $this->sobject()->get($id, $type);
 
-        $array_result = array_replace($result->toArray(), $result->sobject);
+
+
+        $array_result = array_replace($result->toArray(), json_decode(json_encode($result->sobject), true));
 
         if ($result->error->isValid()) {
             $array_result['message_string'] = $result->error->message;
@@ -460,7 +462,8 @@ class Salesforce
                 'raw_headers'    => $headers,
                 'raw_body'       => (string) $response->getBody(),
             ];
-
+$this->log('info',$response_code);
+            $this->log('info',json_encode($data));
             if ($response_code == 200) {
                 $data = array_replace($data, json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
