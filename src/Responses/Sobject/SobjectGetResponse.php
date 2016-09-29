@@ -13,7 +13,7 @@ class SobjectGetResponse extends SalesforceBaseResponse
 
     public function __construct($data)
     {
-        $this->sobject = json_decode($data['raw_body']);
+        $this->sobject = json_decode($data['raw_body'], true);
 
         parent::__construct($data);
     }
