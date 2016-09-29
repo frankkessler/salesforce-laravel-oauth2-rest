@@ -74,7 +74,7 @@ class Sobject
         }
 
         if (!$id || !$type || !$data) {
-            return [];
+            return new SobjectUpdateResponse([]);
         }
 
         return new SobjectUpdateResponse(
