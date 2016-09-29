@@ -462,8 +462,7 @@ class Salesforce
                 'raw_headers'    => $headers,
                 'raw_body'       => (string) $response->getBody(),
             ];
-$this->log('info',$response_code);
-            $this->log('info',json_encode($data));
+
             if ($response_code == 200) {
                 $data = array_replace($data, json_decode((string) $response->getBody(), true));
             } elseif ($response_code == 201) {
