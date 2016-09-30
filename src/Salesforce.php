@@ -466,13 +466,12 @@ class Salesforce
             if ($response_code == 200) {
                 $response_array = json_decode((string) $response->getBody(), true);
 
-                if(is_array($response_array)){
+                if (is_array($response_array)) {
                     $data = array_replace($data, $response_array);
                 }
 
                 $data['success'] = true;
                 $data['http_status'] = 200;
-
             } elseif ($response_code == 201) {
                 $data = array_replace($data, json_decode((string) $response->getBody(), true));
 
