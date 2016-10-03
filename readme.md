@@ -244,3 +244,27 @@ if ($result->id) {
     }
 }
 ```
+
+### Custom REST Endpoint (GET)
+
+```php
+$uri = 'custom_apex_uri_get';
+
+$result = Salesforce::custom()->get($uri);
+
+if($result->http_status == 200){
+    $body = $result->raw_body;
+}
+```
+
+### Custom REST Endpoint (POST)
+
+```php
+$uri = 'custom_apex_uri_post';
+
+$result = Salesforce::custom()->post($uri);
+
+if($result->http_status == 200){
+    //success
+}
+```
