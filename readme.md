@@ -120,10 +120,10 @@ $dn = array(
     "countryName" => "US",
     "stateOrProvinceName" => "New York",
     "localityName" => "New York",
-    "organizationName" => "GuzzleOauth2Middleware",
-    "organizationalUnitName" => "PHP Unit Test",
-    "commonName" => "GuzzleOauth2Middleware",
-    "emailAddress" => "GuzzleOauth2Middleware@example.com"
+    "organizationName" => "SalesforceLaravel",
+    "organizationalUnitName" => "SalesforceLaravel",
+    "commonName" => "SalesforceLaravel",
+    "emailAddress" => "SalesforceLaravel@example.com"
 );
 
 $privateKey = openssl_pkey_new($config);
@@ -150,7 +150,12 @@ Setup your app in Salesforce:
   1. Your callback URL must be https and will follow this format: http://yourdomain.com/salesforce/callback
   2. Check off "Use Digital Signature" and upload the PUBLIC key (public.crt) generated in the previous section.
   3. Select the Oauth scopes you want, but make sure you select the refresh_token, offline_access scope or this flow will fail.
-4. Save and wait 10 minutes for the settings to save.
+4. Save
+5. To get up and running as quick as possible you can follow the next few steps, but they might not work for everyone.
+6. Navigate to Setup -> Manage Apps -> Connected Apps and click on the App you just created
+7. Click edit and select "Admin approved users are pre-authorized" in the Permitted users field
+8. Click Save
+9. Scroll down on the same page and select the Manage Profiles button to add the profiles that are pre-authorized to use JWT Web Tokens in your app
 
 
 Add the following variables to your .env file.
