@@ -30,10 +30,10 @@ return [
         ],
 
         'jwt' => [
-            'private_key' => env('SALESFORCE_OAUTH_JWT_PRIVATE_KEY'),
+            'private_key'            => env('SALESFORCE_OAUTH_JWT_PRIVATE_KEY'),
             'private_key_passphrase' => env('SALESFORCE_OAUTH_JWT_PRIVATE_KEY_PASSPHRASE'),
-            'run_as_user_name' => env('SALESFORCE_OAUTH_JWT_RUN_AS_USER_NAME'),
-        ]
+            'run_as_user_name'       => env('SALESFORCE_OAUTH_JWT_RUN_AS_USER_NAME'),
+        ],
     ],
     'storage_type'           => 'eloquent',
     'storage_global_user_id' => null,
