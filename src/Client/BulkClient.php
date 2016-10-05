@@ -62,7 +62,7 @@ class BulkClient extends Oauth2Client
                 return false;
             }
             if ($response instanceof ResponseInterface) {
-                if ($response->getStatusCode() == 401) {
+                if (in_array($response->getStatusCode(), [400, 401])) {
                     return true;
                 }
             }
@@ -71,7 +71,7 @@ class BulkClient extends Oauth2Client
         },
             function (RequestInterface $request, ResponseInterface $response) {
                 if ($response instanceof ResponseInterface) {
-                    if ($response->getStatusCode() == 401) {
+                    if (in_array($response->getStatusCode(), [400, 401])) {
                         $token = $this->acquireAccessToken();
                         $this->setAccessToken($token, 'Bearer');
 

@@ -9,6 +9,8 @@ return [
         'version' => env('SALESFORCE_API_BASE_VERSION', '36.0'),
     ],
     'oauth' => [
+        'auth_type' => env('SALESFORCE_OAUTH_AUTH_TYPE', 'web_server'), //OPTIONS: web_server or jwt_web_token
+
         'domain' => env('SALESFORCE_OAUTH_DOMAIN', 'login.salesforce.com'),
 
         'authorize_uri' => env('SALESFORCE_OAUTH_AUTHORIZE_URI', '/services/oauth2/authorize'),
@@ -26,6 +28,12 @@ return [
             'offline_access',
             'refresh_token',
         ],
+
+        'jwt' => [
+            'private_key' => env('SALESFORCE_OAUTH_JWT_PRIVATE_KEY'),
+            'private_key_passphrase' => env('SALESFORCE_OAUTH_JWT_PRIVATE_KEY_PASSPHRASE'),
+            'run_as_user_name' => env('SALESFORCE_OAUTH_JWT_RUN_AS_USER_NAME'),
+        ]
     ],
     'storage_type'           => 'eloquent',
     'storage_global_user_id' => null,

@@ -67,7 +67,12 @@ Logging is enabled by default if using Laravel.  If not, add the following to th
 
 #TOKEN SETUP
 
-Currently, this package only supports the web flow for oauth2.  This utilizes access and refresh tokens in order to grant access.
+Currently, this package only supports the web server flow (Authorization Code) and JWT Web Tokens for oauth2.  
+
+
+## Web Server Flow Setup (Authorization Code)
+
+This utilizes access and refresh tokens in order to grant access.
 
 To get started, you'll have to setup a Connected App in Salesforce.
 1. Navigate to Setup -> Create -> Apps
@@ -94,6 +99,73 @@ Route::get('salesforce/callback', '\Frankkessler\Salesforce\Controllers\Salesfor
 ```
 
 Visit https://yourdomain.com/salesforce/login to authorize your application.  Your access token and refresh token will be stored in the salesforce_tokens database table by default.
+
+## JWT Web Token
+
+Setup your public and private key pair.  Salesforce recommends you use an RSA 256 key.  Here is a sample script that will generate a key for you in PHP.
+
+```
+$privateKeyPassphrase = null;
+$csrString = '';
+$privateKeyString = '';
+$certString = '';
+
+$config = [
+    'private_key_type' => \OPENSSL_KEYTYPE_RSA,
+    'digest_alg' => 'sha256',
+    'private_key_bits' => 2048,
+];
+
+$dn = array(
+    "countryName" => "US",
+    "stateOrProvinceName" => "New York",
+    "localityName" => "New York",
+    "organizationName" => "GuzzleOauth2Middleware",
+    "organizationalUnitName" => "PHP Unit Test",
+    "commonName" => "GuzzleOauth2Middleware",
+    "emailAddress" => "GuzzleOauth2Middleware@example.com"
+);
+
+$privateKey = openssl_pkey_new($config);
+
+$csr = openssl_csr_new($dn, $privateKey);
+
+$sscert = openssl_csr_sign($csr, null, $privateKey, 365);
+
+openssl_csr_export($csr, $csrString);
+file_put_contents(__DIR__.'/../csr.csr', $csrString);
+
+openssl_x509_export($sscert, $certString);
+file_put_contents(__DIR__.'/../public.crt', $certString);
+
+openssl_pkey_export($privateKey, $privateKeyString, $privateKeyPassphrase);
+file_put_contents(__DIR__.'/../private.key', $privateKeyString);
+```
+
+Setup your app in Salesforce:
+
+1. Navigate to Setup -> Create -> Apps
+2. In the Connected Apps section, click New
+3. Fill out the form including the Api/Oauth section.
+  1. Your callback URL must be https and will follow this format: http://yourdomain.com/salesforce/callback
+  2. Check off "Use Digital Signature" and upload the PUBLIC key (public.crt) generated in the previous section.
+  3. Select the Oauth scopes you want, but make sure you select the refresh_token, offline_access scope or this flow will fail.
+4. Save and wait 10 minutes for the settings to save.
+
+
+Add the following variables to your .env file.
+
+```
+SALESFORCE_API_DOMAIN=na1.salesforce.com
+SALESFORCE_OAUTH_CALLBACK_URL=https://yourdomain.com/salesforce/callback
+SALESFORCE_OAUTH_DOMAIN=login.salesforce.com
+SALESFORCE_OAUTH_CONSUMER_TOKEN=YOUR_CLIENT_ID_FROM_CREATED_APP
+SALESFORCE_OAUTH_CONSUMER_SECRET=YOUR_CLIENT_SECRET_FROM_CREATED_APP
+SALESFORCE_OAUTH_AUTH_TYPE="jwt_web_token"
+SALESFORCE_OAUTH_JWT_PRIVATE_KEY="/usr/path/to/my/cert.key"
+SALESFORCE_OAUTH_JWT_PRIVATE_KEY_PASSPHRASE="testpassword" //optional
+SALESFORCE_OAUTH_JWT_RUN_AS_USER_NAME="test.use@mycompanyname.com"  //This is the Salesforce username that will be used to connect
+```
 
 # EXAMPLES
 
