@@ -496,6 +496,8 @@ class Salesforce
                 $data = array_replace($data, json_decode((string) $response->getBody(), true));
 
                 $data['operation'] = 'create';
+                $data['success'] = true;
+                $data['http_status'] = 201;
 
                 if (isset($data['id'])) {
                     //make responses more uniform by setting a newly created id as an Id field like you would see from a get
