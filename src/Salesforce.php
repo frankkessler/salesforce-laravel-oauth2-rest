@@ -84,33 +84,33 @@ class Salesforce
         if (isset($this->config_local['token_url'])) {
             $token_url = $this->config_local['token_url'];
         } else {
-            $token_url = 'https://' . SalesforceConfig::get('salesforce.oauth.domain') . SalesforceConfig::get('salesforce.oauth.token_uri');
+            $token_url = 'https://'.SalesforceConfig::get('salesforce.oauth.domain').SalesforceConfig::get('salesforce.oauth.token_uri');
         }
 
-        if(SalesforceConfig::get('salesforce.oauth.auth_type') == 'jwt_web_token') {
+        if (SalesforceConfig::get('salesforce.oauth.auth_type') == 'jwt_web_token') {
             $jwt_token_config = [
-                'client_id' => SalesforceConfig::get('salesforce.oauth.consumer_token'),
-                'client_secret' => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
-                'token_url' => $token_url,
-                'auth_location' => 'body',
-                'jwt_private_key' => SalesforceConfig::get('salesforce.oauth.jwt.private_key'),
+                'client_id'                  => SalesforceConfig::get('salesforce.oauth.consumer_token'),
+                'client_secret'              => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
+                'token_url'                  => $token_url,
+                'auth_location'              => 'body',
+                'jwt_private_key'            => SalesforceConfig::get('salesforce.oauth.jwt.private_key'),
                 'jwt_private_key_passphrase' => SalesforceConfig::get('salesforce.oauth.jwt.private_key_passphrase'),
-                'jwt_algorithm' => 'RS256',
-                'jwt_payload' => [
+                'jwt_algorithm'              => 'RS256',
+                'jwt_payload'                => [
                     'sub' => SalesforceConfig::get('salesforce.oauth.jwt.run_as_user_name'),
                     'aud' => 'https://'.SalesforceConfig::get('salesforce.oauth.domain'),
-                ]
+                ],
             ];
             $grantType = new JwtBearer($jwt_token_config);
             $this->oauth2Client->setGrantType($grantType);
-        }else{  //web_server is default auth type
+        } else {  //web_server is default auth type
             $this->oauth2Client->setRefreshToken($refresh_token);
 
             $refresh_token_config = [
-                'client_id' => SalesforceConfig::get('salesforce.oauth.consumer_token'),
+                'client_id'     => SalesforceConfig::get('salesforce.oauth.consumer_token'),
                 'client_secret' => SalesforceConfig::get('salesforce.oauth.consumer_secret'),
                 'refresh_token' => $refresh_token,
-                'token_url' => $token_url,
+                'token_url'     => $token_url,
                 'auth_location' => 'body',
             ];
             $this->oauth2Client->setRefreshTokenGrantType(new RefreshToken($refresh_token_config));
