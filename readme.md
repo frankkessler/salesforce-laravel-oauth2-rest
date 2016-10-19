@@ -303,6 +303,40 @@ if($result->id){
 }
 ```
 
+### Upsert
+
+```php
+$operationType = 'upsert';
+$objectType = 'Account';
+$objectData = [
+    [
+        'ExternalId__c' => 'ID1',
+        'Name'          => 'Acme',
+        'Description'   => 'Account Description',
+    ],
+    [
+        'ExternalId__c' => 'ID2',
+        'Name'          => 'Acme2',
+        'Description'   => 'Account Description2',
+    ],
+];
+
+$result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData, ['externalIdFieldName' => 'ExternalId__c']);
+
+if($result->id){
+    foreach ($result->batches as $batch) {
+        echo $batch->numberRecordsProcessed;
+        echo $batch->numberRecordsFailed;
+        foreach ($batch->records as $record) {
+            if(!$record['success']){
+                echo 'Record Failed: '.json_encode($record);
+            }
+        }
+    }
+}
+
+```
+
 ### Query
 
 ```php
