@@ -101,7 +101,7 @@ class Bulk extends Salesforce
         }
 
         //only close the job is all batches finished
-        if(count($batches_finished) == count($batches)) {
+        if (count($batches_finished) == count($batches)) {
             $job = $this->closeJob($job->id);
         }
 
