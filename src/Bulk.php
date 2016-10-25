@@ -100,7 +100,11 @@ class Bulk extends Salesforce
             $time = time();
         }
 
-        $job = $this->closeJob($job->id);
+        //only close the job is all batches finished
+        if(count($batches_finished) == count($batches)) {
+            $job = $this->closeJob($job->id);
+        }
+
         $job->batches = $batches;
 
         return $job;
