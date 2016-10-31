@@ -239,7 +239,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $attachmentArray = json_decode($this->requestDotTxtContents());
 
-        foreach($attachmentArray as $attachArray){
+        foreach ($attachmentArray as $attachArray) {
             $binaryBatch->attachments[] = new \Frankkessler\Salesforce\DataObjects\Attachment($attachArray);
         }
 
@@ -265,8 +265,8 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
                 case 5:
                     break;
                 case 2:
-                    file_put_contents(realpath('./build').'/test_download.zip',$response->getBody());
-                    $this->assertEquals(md5_file(realpath('./build').'/test.zip'),md5_file(realpath('./build').'/test_download.zip'));
+                    file_put_contents(realpath('./build').'/test_download.zip', $response->getBody());
+                    $this->assertEquals(md5_file(realpath('./build').'/test.zip'), md5_file(realpath('./build').'/test_download.zip'));
                     $this->assertEquals('THIS IS TEST DATA', $this->getTestText());
                     break;
                 default:
@@ -277,7 +277,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         }
 
         //make sure 5 requests occurred or something went wrong.
-        $this->assertEquals(5, $i-1);
+        $this->assertEquals(5, $i - 1);
 
         GuzzleServer::flush();
     }
@@ -285,7 +285,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     public function getTestText()
     {
         $zip = new ZipArchive();
-        if ($zip->open(realpath('./build/test_download.zip'),  \ZIPARCHIVE::CREATE) === TRUE){
+        if ($zip->open(realpath('./build/test_download.zip'), \ZIPARCHIVE::CREATE) === true) {
             $zip->extractTo(realpath('./build/'));
             $zip->close();
         } else {
@@ -294,7 +294,6 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         return file_get_contents(realpath('./build/').'/test.txt');
     }
-
 
     public function jobArray($overrides = [])
     {

@@ -297,15 +297,16 @@ class Bulk extends Salesforce
         return new BulkBatchResultResponse($result);
     }
 
-
     /******* BINARY SPECIFIC FUNCTIONS *********/
 
     /**
      * @param $operation
      * @param $objectType
      * @param BinaryBatch[] $binaryBatches
-     * @param array $options
+     * @param array         $options
+     *
      * @throws \Exception
+     *
      * @return BulkJobResponse
      */
     public function runBinaryUploadBatch($operation, $objectType, $binaryBatches, $options = [])
@@ -374,7 +375,7 @@ class Bulk extends Salesforce
         }
 
         //only close the job is all batches finished
-        if(count($batches_finished) == count($batches)) {
+        if (count($batches_finished) == count($batches)) {
             $job = $this->closeJob($job->id);
         }
 
