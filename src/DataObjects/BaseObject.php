@@ -1,10 +1,10 @@
 <?php
 
-namespace Frankkessler\Salesforce\Responses;
+namespace Frankkessler\Salesforce\DataObjects;
 
 use Frankkessler\Salesforce\Contracts\Arrayable;
 
-class BaseResponse implements Arrayable
+class BaseObject implements Arrayable
 {
     private $additional_fields = [];
 

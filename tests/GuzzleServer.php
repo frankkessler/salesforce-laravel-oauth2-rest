@@ -97,7 +97,7 @@ class GuzzleServer
                     $message['http_method'],
                     $uri,
                     $message['headers'],
-                    $message['body'],
+                    base64_decode($message['body']),
                     $message['version']
                 );
 

@@ -40,6 +40,7 @@
 
 var http = require('http');
 var url = require('url');
+var fs = require('fs');
 
 /**
  * Guzzle node.js server
@@ -191,6 +192,10 @@ var GuzzleServer = function(port, log) {
             if (that.log) {
                 console.log('Returning response from queue and adding request');
             }
+            request.binary_body = Buffer.concat(request.binary_chunks).toString('base64');
+
+            request.body = request.binary_body;
+
             that.requests.push(request);
             var response = that.responses.shift();
             res.writeHead(response.status, response.reason, response.headers);
@@ -210,16 +215,25 @@ var GuzzleServer = function(port, log) {
                 query_string: parts.query,
                 headers: req.headers,
                 version: req.httpVersion,
-                body: ''
+                body: '',
+                binary_body: '',
+                binary_chunks: [],
+                encoding: null
             };
 
+            //var file = fs.createWriteStream('node.zip');
+
+            // Receive each chunk of the request body
+           // console.log(request.headers);
             // Receive each chunk of the request body
             req.addListener('data', function(chunk) {
+                request.binary_chunks.push(Buffer.from(chunk));
                 request.body += chunk;
+
             });
 
             // Called when the request completes
-            req.addListener('end', function() {
+            req.addListener('end', function(data) {
                 firewallRequest(request, req, res, receivedRequest);
             });
         });

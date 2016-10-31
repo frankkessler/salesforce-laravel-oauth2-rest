@@ -2,9 +2,9 @@
 
 namespace Frankkessler\Salesforce\Responses\Bulk;
 
-use Frankkessler\Salesforce\Responses\BaseResponse;
+use Frankkessler\Salesforce\DataObjects\BaseObject;
 
-class BulkBatchResultResponse extends BaseResponse
+class BulkBatchResultResponse extends BaseObject
 {
     public $records;
 }

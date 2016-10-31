@@ -3,6 +3,7 @@
 namespace Frankkessler\Salesforce;
 
 use Frankkessler\Salesforce\Client\BulkClient;
+use Frankkessler\Salesforce\DataObjects\BinaryBatch;
 use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResponse;
 use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResultResponse;
 use Frankkessler\Salesforce\Responses\Bulk\BulkJobResponse;
@@ -294,5 +295,127 @@ class Bulk extends Salesforce
         }
 
         return new BulkBatchResultResponse($result);
+    }
+
+
+    /******* BINARY SPECIFIC FUNCTIONS *********/
+
+    /**
+     * @param $operation
+     * @param $objectType
+     * @param BinaryBatch[] $binaryBatches
+     * @param array $options
+     * @throws \Exception
+     * @return BulkJobResponse
+     */
+    public function runBinaryUploadBatch($operation, $objectType, $binaryBatches, $options = [])
+    {
+        $batches = [];
+
+        $defaults = [
+            'batchTimeout'        => 600,
+            'contentType'         => 'ZIP_JSON',
+            'pollIntervalSeconds' => 5,
+            'isBatchedResult'     => false,
+            'concurrencyMode'     => 'Parallel',
+        ];
+
+        $options = array_replace($defaults, $options);
+
+        if ($operation == 'query') {
+            $options['isBatchedResult'] = true;
+        }
+
+        $job = $this->createJob($operation, $objectType, null, $options['contentType'], $options['concurrencyMode']);
+
+        if ($job->id) {
+            //if data is array, we can split it into batches
+            if (is_array($binaryBatches)) {
+                foreach ($binaryBatches as $binaryBatch) {
+                    $batches[] = $this->addBinaryBatch($job->id, $binaryBatch);
+                }
+            } else { //probably a string query so run in onee batch
+                throw(new \Exception('$binaryBatches must be an array'));
+            }
+        } else {
+            $this->log('error', 'Job Failed: '.json_encode($job->toArrayAll()));
+        }
+
+        $time = time();
+        $timeout = $time + $options['batchTimeout'];
+
+        $batches_finished = [];
+
+        while (count($batches_finished) < count($batches) && $time < $timeout) {
+            $last_time_start = time();
+            foreach ($batches as &$batch) {
+                //skip processing if batch is already done processing
+                if (in_array($batch->id, $batches_finished)) {
+                    continue;
+                }
+
+                $batch = $this->batchDetails($job->id, $batch->id);
+                if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed'])) {
+                    $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult']);
+                    $batch->records = $batchResult->records;
+                    $batches_finished[] = $batch->id;
+                }
+            }
+
+            //if we aren't complete yet, look to sleep for a few seconds so we don't poll constantly
+            if (count($batches_finished) < count($batches)) {
+                //If the polling for all batches hasn't taken at least the amount of time set for the polling interval, wait the additional time and then continue processing.
+                $wait_time = time() - $last_time_start;
+                if ($wait_time < $options['pollIntervalSeconds']) {
+                    sleep($options['pollIntervalSeconds'] - $wait_time);
+                }
+            }
+            $time = time();
+        }
+
+        //only close the job is all batches finished
+        if(count($batches_finished) == count($batches)) {
+            $job = $this->closeJob($job->id);
+        }
+
+        $job->batches = $batches;
+
+        return $job;
+    }
+
+    /**
+     * @param $jobId
+     * @param BinaryBatch $binaryBatch
+     *
+     * @return BulkBatchResponse
+     */
+    public function addBinaryBatch($jobId, BinaryBatch $binaryBatch)
+    {
+        if (!$jobId) {
+            //throw exception
+            return new BulkBatchResponse();
+        }
+
+        $binaryBatch->prepareBatchFile();
+
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch';
+
+        $body = file_get_contents($binaryBatch->batchZip);
+        $headers = [
+            'Content-type' => 'zip/json',
+            //'Content-Encoding' => 'binary',
+        ];
+
+        $result = $this->call_api('post', $url, [
+            'body' => $body,
+            //'body'    => fopen($binaryBatch->batchZip,'rb'),
+            'headers' => $headers,
+        ]);
+
+        if ($result && is_array($result)) {
+            return new BulkBatchResponse($result);
+        }
+
+        return new BulkBatchResponse();
     }
 }

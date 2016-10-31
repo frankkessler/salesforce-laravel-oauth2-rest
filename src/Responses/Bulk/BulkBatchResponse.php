@@ -2,9 +2,9 @@
 
 namespace Frankkessler\Salesforce\Responses\Bulk;
 
-use Frankkessler\Salesforce\Responses\BaseResponse;
+use Frankkessler\Salesforce\DataObjects\BaseObject;
 
-class BulkBatchResponse extends BaseResponse
+class BulkBatchResponse extends BaseObject
 {
     public $apexProcessingTime = 0;
     public $apiActiveProcessingTime = 0;

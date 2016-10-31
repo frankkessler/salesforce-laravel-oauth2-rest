@@ -2,9 +2,10 @@
 
 namespace Frankkessler\Salesforce\Responses;
 
+use Frankkessler\Salesforce\DataObjects\BaseObject;
 use Frankkessler\Salesforce\DataObjects\SalesforceError;
 
-class SalesforceBaseResponse extends BaseResponse
+class SalesforceBaseResponse extends BaseObject
 {
     /**
      * @var bool

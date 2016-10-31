@@ -201,6 +201,101 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         }
     }
 
+    public function testBulkBinaryJobCreateWithMiddleware()
+    {
+        copy(realpath('./tests/bulk_zip_files').'/zipped_dir.zip', realpath('./build').'/test.zip');
+
+        \Frankkessler\Salesforce\SalesforceConfig::reset();
+        GuzzleServer::flush();
+        GuzzleServer::start();
+
+        GuzzleServer::enqueue([
+            new Response(200, [], json_encode($this->jobArray())),
+            new Response(200, [], json_encode($this->batchArray(['state' => 'Queued']))),
+            new Response(200, [], json_encode($this->batchArray())),
+            new Response(200, [], json_encode($this->dataResultArray())),
+            new Response(200, [], json_encode($this->jobArray())),
+        ]);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+            'auth'                           => 'bulk',
+            'base_uri'                       => GuzzleServer::$url,
+            'bulk_base_uri'                  => GuzzleServer::$url,
+            'token_url'                      => GuzzleServer::$url,
+        ]);
+
+        $jobId = '750D00000004SkVIAU';
+        $batchId = '750D00000004SkGIAU';
+        $attachmentCreatedId = '001xx000003DHP0AAO';
+
+        $operation = 'insert';
+        $objectType = 'Attachment';
+
+        $binaryBatch = new \Frankkessler\Salesforce\DataObjects\BinaryBatch([
+            'batchZip' => realpath('./build').'/test.zip',
+        ]);
+
+        $attachmentArray = json_decode($this->requestDotTxtContents());
+
+        foreach($attachmentArray as $attachArray){
+            $binaryBatch->attachments[] = new \Frankkessler\Salesforce\DataObjects\Attachment($attachArray);
+        }
+
+        $job = $salesforce->bulk()->runBinaryUploadBatch($operation, $objectType, [$binaryBatch]);
+
+        $this->assertEquals($jobId, $job->id);
+
+        foreach ($job->batches as $batch) {
+            $this->assertEquals($batchId, $batch->id);
+            foreach ($batch->records as $record) {
+                $this->assertEquals($attachmentCreatedId, $record['id']);
+                $this->assertTrue($record['success']);
+                break;
+            }
+        }
+
+        $i = 1;
+        foreach (GuzzleServer::received() as $response) {
+            switch ($i) {
+                case 1:
+                case 3:
+                case 4:
+                case 5:
+                    break;
+                case 2:
+                    file_put_contents(realpath('./build').'/test_download.zip',$response->getBody());
+                    $this->assertEquals(md5_file(realpath('./build').'/test.zip'),md5_file(realpath('./build').'/test_download.zip'));
+                    $this->assertEquals('THIS IS TEST DATA', $this->getTestText());
+                    break;
+                default:
+                    //this should never be called.  If it is something went wrong.
+                    $this->assertEquals(0, $response->getStatusCode());
+            }
+            $i++;
+        }
+
+        //make sure 5 requests occurred or something went wrong.
+        $this->assertEquals(5, $i-1);
+
+        GuzzleServer::flush();
+    }
+
+    public function getTestText()
+    {
+        $zip = new ZipArchive();
+        if ($zip->open(realpath('./build/test_download.zip'),  \ZIPARCHIVE::CREATE) === TRUE){
+            $zip->extractTo(realpath('./build/'));
+            $zip->close();
+        } else {
+            throw(new \Exception('Batch zip cannot be opened'));
+        }
+
+        return file_get_contents(realpath('./build/').'/test.txt');
+    }
+
+
     public function jobArray($overrides = [])
     {
         return array_replace([
@@ -303,5 +398,17 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             ]',
             true
         );
+    }
+
+    public function requestDotTxtContents()
+    {
+        //first account is Greatest bank.  Second is Regions Insurance
+        return '[
+            {
+                "Name" : "test.txt",
+                "ParentId" : "0014000001iM8S5AAK",
+                "Body" : "#test.txt"
+            }
+        ]';
     }
 }
