@@ -5,9 +5,7 @@ help:
 	@echo "  test           to perform unit tests.  Provide TEST to perform a specific test."
 
 start-server: stop-server
-    node --version
-    npm --version
-	node tests/server.js &> /dev/null &
+	node --version && npm --version && node tests/server.js &> /dev/null &
 
 stop-server:
 	@PID=$(shell ps axo pid,command \
