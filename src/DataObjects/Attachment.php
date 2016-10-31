@@ -26,8 +26,8 @@ class Attachment extends BaseObject
     {
         $return = get_object_public_vars($this);
 
-        foreach($return as $key=>$value){
-            if(is_null($value)){
+        foreach ($return as $key => $value) {
+            if (is_null($value)) {
                 unset($return[$key]);
             }
         }
