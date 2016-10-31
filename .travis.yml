@@ -13,6 +13,8 @@ before_script:
   - ~/.nvm/nvm.sh install v6.9.1
   - ~/.nvm/nvm.sh run v6.9.1
   - mkdir -p build/logs
+  - node --version
+  - npm --version
 script: make test
 after_success:
   - travis_retry php vendor/bin/coveralls
