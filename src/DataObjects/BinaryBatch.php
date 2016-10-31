@@ -2,12 +2,12 @@
 
 namespace Frankkessler\Salesforce\DataObjects;
 
-use \ZipArchive;
+use ZipArchive;
 
 class BinaryBatch extends BaseObject
 {
     public $batchZip = '';
-    /** @var Attachment[] $attachments  */
+    /** @var Attachment[] $attachments */
     public $attachments = [];
 
     /**
@@ -19,7 +19,7 @@ class BinaryBatch extends BaseObject
     {
         $result = [];
 
-        foreach($this->attachments as $attachment){
+        foreach ($this->attachments as $attachment) {
             $result[] = $attachment->toArray();
         }
 
@@ -28,15 +28,15 @@ class BinaryBatch extends BaseObject
 
     public function prepareBatchFile()
     {
-        if($this->batchZip && is_writeable($this->batchZip)){
+        if ($this->batchZip && is_writable($this->batchZip)) {
             $zip = new ZipArchive();
-            if ($zip->open($this->batchZip,  \ZIPARCHIVE::CREATE) === TRUE){
+            if ($zip->open($this->batchZip, \ZIPARCHIVE::CREATE) === true) {
                 $zip->addFromString('request.txt', json_encode($this->toArray()));
                 $zip->close();
             } else {
                 throw(new \Exception('Batch zip cannot be opened'));
             }
-        }else{
+        } else {
             throw(new \Exception('Batch zip must be defined to use binary batches'));
         }
     }
