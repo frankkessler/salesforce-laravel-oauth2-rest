@@ -466,6 +466,12 @@ class Salesforce
 
             $options['http_errors'] = false;
 
+            $format = 'json';
+            if(isset($options['format'])){
+                $format = $options['format'];
+                unset($options['format']);
+            }
+
             $response = $this->oauth2Client->{$method}($url, $options);
 
             /* @var $response \GuzzleHttp\Psr7\Response */
@@ -483,9 +489,17 @@ class Salesforce
                 'raw_body'       => (string) $response->getBody(),
             ];
 
-            if ($response_code == 200) {
+            if($format == 'xml'){
+                $xml = simplexml_load_string( (string) $response->getBody() , null , LIBXML_NOCDATA );
+                $json = json_encode($xml);
+                $response_array = json_decode($json,TRUE);
+            }elseif($format == 'csv'){
+                $response_array = csvToArray((string) $response->getBody());
+            }else{
                 $response_array = json_decode((string) $response->getBody(), true);
+            }
 
+            if ($response_code == 200) {
                 if (is_array($response_array)) {
                     $data = array_replace($data, $response_array);
                 }
@@ -493,8 +507,9 @@ class Salesforce
                 $data['success'] = true;
                 $data['http_status'] = 200;
             } elseif ($response_code == 201) {
-                $data = array_replace($data, json_decode((string) $response->getBody(), true));
-
+                if(is_array($response_array)) {
+                    $data = array_replace($data, $response_array);
+                }
                 $data['operation'] = 'create';
                 $data['success'] = true;
                 $data['http_status'] = 201;
@@ -518,16 +533,14 @@ class Salesforce
                     ]);
                 }
             } else {
-                $full_data = json_decode((string) $response->getBody(), true);
-                if (!is_array($full_data)) {
-                    $data = array_merge($data, ['message' => $full_data]);
-                } elseif (count($full_data) > 1) {
-                    $data = array_merge($data, $full_data);
+                if (!is_array($response_array)) {
+                    $data = array_merge($data, ['message' => $response_array]);
+                } elseif (count($response_array) > 1) {
+                    $data = array_merge($data, $response_array);
                 } else {
                     $data['raw_sfdc_error'] = (string) $response->getBody();
-                    $data = array_merge($data, current($full_data));
+                    $data = array_merge($data, current($response_array));
                 }
-
 
                 if ($data && isset($data['message'])) {
                     $data['message_string'] = $data['message'];

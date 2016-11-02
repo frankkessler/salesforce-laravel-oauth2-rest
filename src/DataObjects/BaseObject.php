@@ -6,6 +6,17 @@ use Frankkessler\Salesforce\Contracts\Arrayable;
 
 class BaseObject implements Arrayable
 {
+
+    /**
+     * @var array
+     */
+    protected $raw_headers;
+
+    /**
+     * @var string
+     */
+    protected $raw_body;
+
     private $additional_fields = [];
 
     public function __construct($data = [])
@@ -17,6 +28,26 @@ class BaseObject implements Arrayable
                 $this->additional_fields[$key] = $value;
             }
         }
+    }
+
+    /**
+     * Get Raw Headers from Http Response.
+     *
+     * @return array
+     */
+    public function getRawHeaders()
+    {
+        return $this->raw_headers;
+    }
+
+    /**
+     * Get Raw body from Http Response.
+     *
+     * @return string
+     */
+    public function getRawBody()
+    {
+        return $this->raw_body;
     }
 
     /**

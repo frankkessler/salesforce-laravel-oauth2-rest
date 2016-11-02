@@ -211,9 +211,9 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         GuzzleServer::enqueue([
             new Response(200, [], json_encode($this->jobArray())),
-            new Response(200, [], json_encode($this->batchArray(['state' => 'Queued']))),
-            new Response(200, [], json_encode($this->batchArray())),
-            new Response(200, [], json_encode($this->dataResultArray())),
+            new Response(200, [], $this->batchArrayBinary('Queued')),
+            new Response(200, [], $this->batchArrayBinary()),
+            new Response(200, [], $this->dataResultCsv()),
             new Response(200, [], json_encode($this->jobArray())),
         ]);
 
@@ -227,8 +227,8 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         ]);
 
         $jobId = '750D00000004SkVIAU';
-        $batchId = '750D00000004SkGIAU';
-        $attachmentCreatedId = '001xx000003DHP0AAO';
+        $batchId = '751540000010UC6AAM';
+        $attachmentCreatedId = '001xx000003DHP1AAO';
 
         $operation = 'insert';
         $objectType = 'Attachment';
@@ -251,7 +251,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             $this->assertEquals($batchId, $batch->id);
             foreach ($batch->records as $record) {
                 $this->assertEquals($attachmentCreatedId, $record['id']);
-                $this->assertTrue($record['success']);
+                $this->assertEquals(true,$record['success']);
                 break;
             }
         }
@@ -338,6 +338,11 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         ], $overrides);
     }
 
+    public function batchArrayBinary($state='Completed')
+    {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><batchInfo xmlns=\"http://www.force.com/2009/06/asyncapi/dataload\"><id>751540000010UC6AAM</id><jobId>750540000010wizAAA</jobId><state>".$state."</state><createdDate>2016-11-01T19:14:57.000Z</createdDate><systemModstamp>2016-11-01T19:14:58.000Z</systemModstamp><numberRecordsProcessed>1</numberRecordsProcessed><numberRecordsFailed>0</numberRecordsFailed><totalProcessingTime>342</totalProcessingTime><apiActiveProcessingTime>205</apiActiveProcessingTime><apexProcessingTime>0</apexProcessingTime></batchInfo>";
+    }
+
     public function dataArray()
     {
         return [
@@ -368,6 +373,12 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
                 'errors'  => [],
             ],
         ];
+    }
+
+    public function dataResultCsv()
+    {
+        return 'success,created,id,errors
+true,true,001xx000003DHP1AAO,';
     }
 
     public function dataQueryResultArray()

@@ -229,11 +229,13 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function batchDetails($jobId, $batchId)
+    public function batchDetails($jobId, $batchId, $format='json')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId;
 
-        $result = $this->call_api('get', $url);
+        $result = $this->call_api('get', $url, [
+            'format' => $format,
+        ]);
 
         if ($result && is_array($result)) {
             return new BulkBatchResponse($result);
@@ -250,7 +252,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResultResponse
      */
-    public function batchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null)
+    public function batchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null, $format='json')
     {
         if (!$jobId || !$batchId) {
             //throw exception
@@ -264,7 +266,9 @@ class Bulk extends Salesforce
             $url = $url.'/'.$resultId;
         }
 
-        $result = $this->call_api('get', $url);
+        $result = $this->call_api('get', $url, [
+            'format' => $format,
+        ]);
 
         if ($result && is_array($result)) {
 
@@ -285,6 +289,17 @@ class Bulk extends Salesforce
                     $batchResult = $this->batchResult($jobId, $batchId, false, $result[$i]);
                     $result['records'] = array_merge($result['records'], $batchResult->records);
                 } else {
+                    //fix boolean values from appearing as
+                    foreach(['success','created'] as $field){
+                        if(isset($result[$i][$field])){
+                            if($result[$i][$field] == 'true') {
+                                $result[$i][$field] = true;
+                            }else{
+                                $result[$i][$field] = false;
+                            }
+                        }
+                    }
+
                     $result['records'][$i] = $result[$i];
                 }
 
@@ -315,7 +330,7 @@ class Bulk extends Salesforce
 
         $defaults = [
             'batchTimeout'        => 600,
-            'contentType'         => 'ZIP_JSON',
+            'contentType'         => 'ZIP_CSV',
             'pollIntervalSeconds' => 5,
             'isBatchedResult'     => false,
             'concurrencyMode'     => 'Parallel',
@@ -347,6 +362,7 @@ class Bulk extends Salesforce
 
         $batches_finished = [];
 
+        $resultFormat = strtolower(explode('_',$options['contentType'])[1]);
         while (count($batches_finished) < count($batches) && $time < $timeout) {
             $last_time_start = time();
             foreach ($batches as &$batch) {
@@ -355,11 +371,12 @@ class Bulk extends Salesforce
                     continue;
                 }
 
-                $batch = $this->batchDetails($job->id, $batch->id);
+                $batch = $this->batchDetails($job->id, $batch->id, $this->batchResponseFormatFromContentType($options['contentType']));
+
                 if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed'])) {
-                    $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult']);
-                    $batch->records = $batchResult->records;
                     $batches_finished[] = $batch->id;
+                    $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult'], null, $resultFormat);
+                    $batch->records = $batchResult->records;
                 }
             }
 
@@ -390,7 +407,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBinaryBatch($jobId, BinaryBatch $binaryBatch)
+    public function addBinaryBatch($jobId, BinaryBatch $binaryBatch, $contentType='zip/csv')
     {
         if (!$jobId) {
             //throw exception
@@ -403,14 +420,14 @@ class Bulk extends Salesforce
 
         $body = file_get_contents($binaryBatch->batchZip);
         $headers = [
-            'Content-type' => 'zip/json',
-            //'Content-Encoding' => 'binary',
+            'Content-type' => $contentType,
         ];
 
         $result = $this->call_api('post', $url, [
             'body' => $body,
             //'body'    => fopen($binaryBatch->batchZip,'rb'),
             'headers' => $headers,
+            'format' => $this->batchResponseFormatFromContentType($contentType),
         ]);
 
         if ($result && is_array($result)) {
@@ -418,5 +435,31 @@ class Bulk extends Salesforce
         }
 
         return new BulkBatchResponse();
+    }
+
+   /* public function binaryBatchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null, $format='json')
+    {
+        $result = $this->batchResult($jobId, $batchId, $isBatchedResult, $resultId, $format);
+
+        if($result->state)
+    }
+*/
+    protected function batchResponseFormatFromContentType($contentType)
+    {
+
+        switch(strtoupper($contentType))
+        {
+            case 'ZIP_CSV':
+            case 'ZIP/CSV':
+            case 'ZIP_XML':
+            case 'ZIP/XML':
+                $return = 'xml';
+                break;
+            default:
+                $return = 'json';
+                break;
+        }
+
+        return $return;
     }
 }

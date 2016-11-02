@@ -49,3 +49,35 @@ if (!function_exists('env')) {
         return $value;
     }
 }
+
+if (!function_exists('str_putcsv')) {
+    function str_putcsv($input, $delimiter = ',', $enclosure = '"') {
+        $fp = fopen('php://temp', 'r+b');
+        foreach($input as $row) {
+            fputcsv($fp, $row, $delimiter, $enclosure);
+            fwrite($fp, "\r\n");
+        }
+        rewind($fp);
+        $data = stream_get_contents($fp);
+        fclose($fp);
+        return $data;
+    }
+}
+
+if (!function_exists('csvToArray')) {
+    function csvToArray($csv_string)
+    {
+        $csv = array_map('str_getcsv',explode("\n", $csv_string));
+        $header = array_shift($csv);
+
+        $result = [];
+
+        foreach($csv as $row){
+            if(count($row) == count($header)) {
+                $result[] = array_combine($header, $row);
+            }
+        }
+
+        return $result;
+    }
+}

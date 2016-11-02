@@ -32,15 +32,7 @@ class SalesforceBaseResponse extends BaseObject
      */
     protected $raw_sfdc_errors;
 
-    /**
-     * @var array
-     */
-    protected $raw_headers;
 
-    /**
-     * @var string
-     */
-    protected $raw_body;
 
     public function __construct($data = [])
     {
@@ -59,25 +51,5 @@ class SalesforceBaseResponse extends BaseObject
         if (!$this->success && $this->http_status_code >= 200 && $this->http_status_code <= 299) {
             $this->success = true;
         }
-    }
-
-    /**
-     * Get Raw Headers from Http Response.
-     *
-     * @return array
-     */
-    public function getRawHeaders()
-    {
-        return $this->raw_headers;
-    }
-
-    /**
-     * Get Raw body from Http Response.
-     *
-     * @return string
-     */
-    public function getRawBody()
-    {
-        return $this->raw_body;
     }
 }
