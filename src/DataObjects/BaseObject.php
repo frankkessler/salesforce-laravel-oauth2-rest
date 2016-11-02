@@ -6,7 +6,6 @@ use Frankkessler\Salesforce\Contracts\Arrayable;
 
 class BaseObject implements Arrayable
 {
-
     /**
      * @var array
      */

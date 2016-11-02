@@ -32,8 +32,6 @@ class SalesforceBaseResponse extends BaseObject
      */
     protected $raw_sfdc_errors;
 
-
-
     public function __construct($data = [])
     {
         if (isset($data['raw_sfdc_error'])) {

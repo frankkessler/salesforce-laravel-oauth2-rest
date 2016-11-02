@@ -229,7 +229,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function batchDetails($jobId, $batchId, $format='json')
+    public function batchDetails($jobId, $batchId, $format = 'json')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId;
 
@@ -252,7 +252,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResultResponse
      */
-    public function batchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null, $format='json')
+    public function batchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null, $format = 'json')
     {
         if (!$jobId || !$batchId) {
             //throw exception
@@ -290,11 +290,11 @@ class Bulk extends Salesforce
                     $result['records'] = array_merge($result['records'], $batchResult->records);
                 } else {
                     //fix boolean values from appearing as
-                    foreach(['success','created'] as $field){
-                        if(isset($result[$i][$field])){
-                            if($result[$i][$field] == 'true') {
+                    foreach (['success', 'created'] as $field) {
+                        if (isset($result[$i][$field])) {
+                            if ($result[$i][$field] == 'true') {
                                 $result[$i][$field] = true;
-                            }else{
+                            } else {
                                 $result[$i][$field] = false;
                             }
                         }
@@ -362,7 +362,7 @@ class Bulk extends Salesforce
 
         $batches_finished = [];
 
-        $resultFormat = strtolower(explode('_',$options['contentType'])[1]);
+        $resultFormat = strtolower(explode('_', $options['contentType'])[1]);
         while (count($batches_finished) < count($batches) && $time < $timeout) {
             $last_time_start = time();
             foreach ($batches as &$batch) {
@@ -407,7 +407,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBinaryBatch($jobId, BinaryBatch $binaryBatch, $contentType='zip/csv')
+    public function addBinaryBatch($jobId, BinaryBatch $binaryBatch, $contentType = 'zip/csv')
     {
         if (!$jobId) {
             //throw exception
@@ -427,7 +427,7 @@ class Bulk extends Salesforce
             'body' => $body,
             //'body'    => fopen($binaryBatch->batchZip,'rb'),
             'headers' => $headers,
-            'format' => $this->batchResponseFormatFromContentType($contentType),
+            'format'  => $this->batchResponseFormatFromContentType($contentType),
         ]);
 
         if ($result && is_array($result)) {
@@ -446,9 +446,7 @@ class Bulk extends Salesforce
 */
     protected function batchResponseFormatFromContentType($contentType)
     {
-
-        switch(strtoupper($contentType))
-        {
+        switch (strtoupper($contentType)) {
             case 'ZIP_CSV':
             case 'ZIP/CSV':
             case 'ZIP_XML':
