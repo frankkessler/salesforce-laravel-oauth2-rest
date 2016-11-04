@@ -467,7 +467,7 @@ class Salesforce
             $options['http_errors'] = false;
 
             $format = 'json';
-            if(isset($options['format'])){
+            if (isset($options['format'])) {
                 $format = $options['format'];
                 unset($options['format']);
             }
@@ -489,13 +489,13 @@ class Salesforce
                 'raw_body'       => (string) $response->getBody(),
             ];
 
-            if($format == 'xml'){
-                $xml = simplexml_load_string( (string) $response->getBody() , null , LIBXML_NOCDATA );
+            if ($format == 'xml') {
+                $xml = simplexml_load_string((string) $response->getBody(), null, LIBXML_NOCDATA);
                 $json = json_encode($xml);
-                $response_array = json_decode($json,TRUE);
-            }elseif($format == 'csv'){
+                $response_array = json_decode($json, true);
+            } elseif ($format == 'csv') {
                 $response_array = csvToArray((string) $response->getBody(), $lowerCaseHeaders=true);
-            }else{
+            } else {
                 $response_array = json_decode((string) $response->getBody(), true);
             }
 
@@ -507,7 +507,7 @@ class Salesforce
                 $data['success'] = true;
                 $data['http_status'] = 200;
             } elseif ($response_code == 201) {
-                if(is_array($response_array)) {
+                if (is_array($response_array)) {
                     $data = array_replace($data, $response_array);
                 }
                 $data['operation'] = 'create';

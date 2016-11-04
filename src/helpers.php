@@ -51,15 +51,17 @@ if (!function_exists('env')) {
 }
 
 if (!function_exists('str_putcsv')) {
-    function str_putcsv($input, $delimiter = ',', $enclosure = '"') {
+    function str_putcsv($input, $delimiter = ',', $enclosure = '"')
+    {
         $fp = fopen('php://temp', 'r+b');
-        foreach($input as $row) {
+        foreach ($input as $row) {
             fputcsv($fp, $row, $delimiter, $enclosure);
             fwrite($fp, "\r\n");
         }
         rewind($fp);
         $data = stream_get_contents($fp);
         fclose($fp);
+
         return $data;
     }
 }
@@ -67,7 +69,7 @@ if (!function_exists('str_putcsv')) {
 if (!function_exists('csvToArray')) {
     function csvToArray($csv_string, $lowerCaseHeaders=false)
     {
-        $csv = array_map('str_getcsv',explode("\n", $csv_string));
+        $csv = array_map('str_getcsv', explode("\n", $csv_string));
         $header = array_shift($csv);
 
         if($lowerCaseHeaders){
@@ -76,8 +78,8 @@ if (!function_exists('csvToArray')) {
 
         $result = [];
 
-        foreach($csv as $row){
-            if(count($row) == count($header)) {
+        foreach ($csv as $row) {
+            if (count($row) == count($header)) {
                 $result[] = array_combine($header, $row);
             }
         }

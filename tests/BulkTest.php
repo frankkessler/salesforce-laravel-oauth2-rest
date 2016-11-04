@@ -251,7 +251,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             $this->assertEquals($batchId, $batch->id);
             foreach ($batch->records as $record) {
                 $this->assertEquals($attachmentCreatedId, $record['id']);
-                $this->assertEquals(true,$record['success']);
+                $this->assertEquals(true, $record['success']);
                 break;
             }
         }
@@ -338,9 +338,9 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         ], $overrides);
     }
 
-    public function batchArrayBinary($state='Completed')
+    public function batchArrayBinary($state = 'Completed')
     {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><batchInfo xmlns=\"http://www.force.com/2009/06/asyncapi/dataload\"><id>751540000010UC6AAM</id><jobId>750540000010wizAAA</jobId><state>".$state."</state><createdDate>2016-11-01T19:14:57.000Z</createdDate><systemModstamp>2016-11-01T19:14:58.000Z</systemModstamp><numberRecordsProcessed>1</numberRecordsProcessed><numberRecordsFailed>0</numberRecordsFailed><totalProcessingTime>342</totalProcessingTime><apiActiveProcessingTime>205</apiActiveProcessingTime><apexProcessingTime>0</apexProcessingTime></batchInfo>";
+        return '<?xml version="1.0" encoding="UTF-8"?><batchInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload"><id>751540000010UC6AAM</id><jobId>750540000010wizAAA</jobId><state>'.$state.'</state><createdDate>2016-11-01T19:14:57.000Z</createdDate><systemModstamp>2016-11-01T19:14:58.000Z</systemModstamp><numberRecordsProcessed>1</numberRecordsProcessed><numberRecordsFailed>0</numberRecordsFailed><totalProcessingTime>342</totalProcessingTime><apiActiveProcessingTime>205</apiActiveProcessingTime><apexProcessingTime>0</apexProcessingTime></batchInfo>';
     }
 
     public function dataArray()
