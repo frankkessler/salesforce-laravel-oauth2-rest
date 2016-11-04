@@ -494,7 +494,7 @@ class Salesforce
                 $json = json_encode($xml);
                 $response_array = json_decode($json,TRUE);
             }elseif($format == 'csv'){
-                $response_array = csvToArray((string) $response->getBody());
+                $response_array = csvToArray((string) $response->getBody(), $lowerCaseHeaders=true);
             }else{
                 $response_array = json_decode((string) $response->getBody(), true);
             }

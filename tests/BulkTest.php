@@ -377,7 +377,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
     public function dataResultCsv()
     {
-        return 'success,created,id,errors
+        return 'Success,Created,Id,Errors
 true,true,001xx000003DHP1AAO,';
     }
 

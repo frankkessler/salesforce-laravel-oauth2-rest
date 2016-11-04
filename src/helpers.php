@@ -65,10 +65,14 @@ if (!function_exists('str_putcsv')) {
 }
 
 if (!function_exists('csvToArray')) {
-    function csvToArray($csv_string)
+    function csvToArray($csv_string, $lowerCaseHeaders=false)
     {
         $csv = array_map('str_getcsv',explode("\n", $csv_string));
         $header = array_shift($csv);
+
+        if($lowerCaseHeaders){
+            $header = array_map('strtolower', $header);
+        }
 
         $result = [];
 
