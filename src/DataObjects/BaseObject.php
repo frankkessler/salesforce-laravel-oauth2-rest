@@ -30,6 +30,16 @@ class BaseObject implements Arrayable
     }
 
     /**
+     * Get Additional Fields.
+     *
+     * @return array
+     */
+    public function getAdditionalFields()
+    {
+        return $this->additional_fields;
+    }
+
+    /**
      * Get Raw Headers from Http Response.
      *
      * @return array
