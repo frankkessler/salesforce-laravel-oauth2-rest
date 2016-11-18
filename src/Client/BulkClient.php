@@ -11,6 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class BulkClient extends Oauth2Client
 {
+    protected $config;
+
     public function __construct($config = [])
     {
         if (!isset($config['handler'])) {
@@ -18,6 +20,8 @@ class BulkClient extends Oauth2Client
         }
 
         parent::__construct($config);
+
+        $this->config = $config;
     }
 
     /**
@@ -43,6 +47,10 @@ class BulkClient extends Oauth2Client
         return  Middleware::mapRequest(function (RequestInterface $request) {
             if ($this->getConfig('auth') == 'bulk') {
                 $token = $this->getAccessToken();
+
+                if (isset($this->config['pk_chunking'])) {
+                    $request = $request->withHeader('Sforce-Enable-PKChunking', 'chunkSize='.$this->config['pk_chunking']);
+                }
 
                 if ($token !== null) {
                     $request = $request->withHeader('X-SFDC-Session', $token->getToken());
