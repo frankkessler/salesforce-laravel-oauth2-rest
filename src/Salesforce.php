@@ -438,10 +438,10 @@ class Salesforce
     /**
      * @return Bulk
      */
-    public function bulk()
+    public function bulk($config = [])
     {
         if (!$this->bulk_api) {
-            $this->bulk_api = new Bulk($this->config_local);
+            $this->bulk_api = new Bulk(array_merge($this->config_local, $config));
         }
 
         return $this->bulk_api;

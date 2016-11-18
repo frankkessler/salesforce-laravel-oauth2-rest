@@ -26,10 +26,89 @@ class Bulk extends Salesforce
         if (isset($config['handler'])) {
             $client_config['handler'] = $config['handler'];
         }
+        
+        if (isset($config['pk_chunking'])) {
+            $client_config['pk_chunking'] = $config['pk_chunking'];
+        }
 
         $this->oauth2Client = new BulkClient($client_config);
 
         parent::__construct(array_replace($config, $client_config));
+    }
+    
+    public function runPKChunkingBatch($objectType, $data, $options = [], callable $callable)
+    {
+        $defaults = [
+            'externalIdFieldName' => null,
+            'batchTimeout'        => 600,
+            'contentType'         => 'CSV',
+            'pollIntervalSeconds' => 5,
+            'isBatchedResult'     => true,
+            'concurrencyMode'     => 'Parallel',
+        ];
+
+        $options = array_replace($defaults, $options);      
+        $job = $this->createJob('query', $objectType, $options['externalIdFieldName'], $options['contentType'], $options['concurrencyMode']);
+        
+        if ($job->id) {
+            $batch = $this->addBatch($job->id, $data, 'xml');
+            
+            // Poll to find out when all batches are created.
+            $details = $this->batchDetails($job->id, $batch->id, 'xml');
+            while($details->state != 'NotProcessed') {
+                $details = $this->batchDetails($job->id, $batch->id, 'xml');
+                sleep($options['pollIntervalSeconds']);
+            }
+
+            // We need to get the batch information so we can process the results of it
+            $batchResponse = $this->getBatches($job, 'xml');
+            $batches = $batchResponse->getAdditionalFields()['batchInfo'];
+
+            $time = time();
+            $timeout = $time + $options['batchTimeout'];
+
+            $batches_finished = [];
+
+            while (count($batches_finished) < count($batches) && $time < $timeout) {
+                $last_time_start = time();
+                foreach ($batches as $batch) {
+                    $batch = new BulkBatchResponse($batch);
+                    //skip processing if batch is already done processing
+                    if (in_array($batch->id, $batches_finished)) {
+                        continue;
+                    }
+
+                    $batch = Salesforce::bulk()->batchDetails($job->id, $batch->id, 'xml');
+                    if ($batch->numberRecordsProcessed > 0) {
+                      if (in_array($batch->state, ['Completed', 'Failed', 'NotProcessed'])) {
+                          $batchResult = $this->batchResult($job->id, $batch->id, true, null, 'csv');
+                          $body = simplexml_load_string($batchResult->getRawBody());
+
+                          $batchResult = $this->batchResult($job->id, $batch->id, false, (string)$body->result, 'csv');
+                          
+                          call_user_func($callable, $batchResult);
+
+                          $batches_finished[] = $batch->id;
+                      }
+                    }
+                }
+
+                //if we aren't complete yet, look to sleep for a few seconds so we don't poll constantly
+                if (count($batches_finished) < count($batches)) {
+                    //If the polling for all batches hasn't taken at least the amount of time set for the polling interval, wait the additional time and then continue processing.
+                    $wait_time = time() - $last_time_start;
+                    if ($wait_time < $options['pollIntervalSeconds']) {
+                        sleep($options['pollIntervalSeconds'] - $wait_time);
+                    }
+                }
+                $time = time();
+            }
+
+            //only close the job is all batches finished
+            if (count($batches_finished) == count($batches)) {
+                $this->closeJob($job->id);
+            }
+        }   
     }
 
     public function runBatch($operation, $objectType, $data, $options = [])
@@ -191,7 +270,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBatch($jobId, $data)
+    public function addBatch($jobId, $data, $format = 'json')
     {
         if (!$jobId) {
             //throw exception
@@ -214,6 +293,7 @@ class Bulk extends Salesforce
         $result = $this->call_api('post', $url, [
             'body'    => $body,
             'headers' => $headers,
+            'format' => $format
         ]);
 
         if ($result && is_array($result)) {
@@ -310,6 +390,23 @@ class Bulk extends Salesforce
         }
 
         return new BulkBatchResultResponse($result);
+    }
+    
+    public function getBatches($job, $format = 'json')
+    {
+        $url = '/services/async/36.0/job/'.$job->id.'/batch';
+
+        $result = $this->call_api('get', $url, [
+            'format' => $format,
+        ]);
+
+        if ($result && is_array($result)) {
+            return new BulkBatchResponse($result);
+        } else {
+            //throw exception
+        }
+
+        return new BulkBatchResponse();
     }
 
     /******* BINARY SPECIFIC FUNCTIONS *********/
