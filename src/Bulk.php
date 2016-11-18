@@ -26,6 +26,10 @@ class Bulk extends Salesforce
         if (isset($config['handler'])) {
             $client_config['handler'] = $config['handler'];
         }
+        
+        if (isset($config['pk_chunking'])) {
+            $client_config['pk_chunking'] = $config['pk_chunking'];
+        }
 
         $this->oauth2Client = new BulkClient($client_config);
 
@@ -191,7 +195,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBatch($jobId, $data)
+    public function addBatch($jobId, $data, $format = 'json')
     {
         if (!$jobId) {
             //throw exception
@@ -214,6 +218,7 @@ class Bulk extends Salesforce
         $result = $this->call_api('post', $url, [
             'body'    => $body,
             'headers' => $headers,
+            'format' => $format
         ]);
 
         if ($result && is_array($result)) {
