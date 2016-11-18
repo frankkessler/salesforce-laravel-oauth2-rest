@@ -316,6 +316,23 @@ class Bulk extends Salesforce
 
         return new BulkBatchResultResponse($result);
     }
+    
+    public function getBatches($job, $format = 'json')
+    {
+        $url = '/services/async/36.0/job/'.$job->id.'/batch';
+
+        $result = $this->call_api('get', $url, [
+            'format' => $format,
+        ]);
+
+        if ($result && is_array($result)) {
+            return new BulkBatchResponse($result);
+        } else {
+            //throw exception
+        }
+
+        return new BulkBatchResponse();
+    }
 
     /******* BINARY SPECIFIC FUNCTIONS *********/
 
