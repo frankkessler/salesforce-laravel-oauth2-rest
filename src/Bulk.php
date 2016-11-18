@@ -47,8 +47,7 @@ class Bulk extends Salesforce
             'concurrencyMode'     => 'Parallel',
         ];
 
-        $options = array_replace($defaults, $options);
-      
+        $options = array_replace($defaults, $options);      
         $job = $this->createJob('query', $objectType, $options['externalIdFieldName'], $options['contentType'], $options['concurrencyMode']);
         
         if ($job->id) {
