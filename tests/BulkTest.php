@@ -186,9 +186,9 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $operation = 'query';
         $objectType = 'Account';
-        $data = $this->dataArray();
+        $query = "SELECT Id, Name FROM Account WHERE RecordTypeId='xxxxxxxxxxxxxx'";
 
-        $job = $salesforce->bulk()->runBatch($operation, $objectType, $data);
+        $job = $salesforce->bulk()->runBatch($operation, $objectType, $query);
 
         $this->assertEquals($jobId, $job->id);
 
@@ -196,6 +196,60 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             $this->assertEquals($batchId, $batch->id);
             foreach ($batch->records as $record) {
                 $this->assertEquals($firstAccountId, $record['Id']);
+                break;
+            }
+        }
+    }
+
+    public function testRunPkChunkQueryBatch()
+    {
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(200, [], json_encode($this->jobArray())),
+            new Response(200, [], $this->batchXml()),
+            new Response(200, [], $this->batchListXml()),
+            new Response(200, [], $this->batchXml('NotProcessed')),
+            new Response(200, [], $this->batchXml('Completed','8914000000B5YcIAAV','89040000006iLsVAAU')),
+            new Response(200, [], $this->dataQueryResultXml()),
+            new Response(200, [], $this->dataQueryDataResultCsv()),
+            new Response(200, [], json_encode($this->jobArray())),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $jobId = '750D00000004SkVIAU';
+        $batchId = '8914000000B5YcIAAV';
+        $firstAccountId = '0014000001iM8r3AAC';
+
+        $operation = 'query';
+        $objectType = 'Account';
+        $query = "SELECT Id, Name FROM Account WHERE RecordTypeId='xxxxxxxxxxxxxx'";
+
+        $job = $salesforce->bulk()->runBatch($operation, $objectType, $query, [
+            'contentType' => 'CSV',
+            'Sforce-Enable-PKChunking' => [
+                'chunkSize' => 2500,
+            ],
+        ]);
+
+        $this->assertEquals($jobId, $job->id);
+
+        $i=0;
+        foreach ($job->batches as $batch) {
+            //second batch is the one with data
+            if($i==0){
+                $i++;
+                continue;
+            }
+            $this->assertEquals($batchId, $batch->id);
+            foreach ($batch->records as $record) {
+                $this->assertEquals($firstAccountId, $record['id']);
                 break;
             }
         }
@@ -420,5 +474,63 @@ true,true,001xx000003DHP1AAO,';
                 "Body" : "#test.txt"
             }
         ]';
+    }
+
+    public function batchXml($state='Queued', $batchId='89040000006iLsVAAU', $jobId='750D00000004SkVIAU')
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?><batchInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+ <id>'.$batchId.'</id>
+ <jobId>'.$jobId.'</jobId>
+ <state>'.$state.'</state>
+ <createdDate>2016-11-23T02:06:34.000Z</createdDate>
+ <systemModstamp>2016-11-23T02:06:34.000Z</systemModstamp>
+ <numberRecordsProcessed>0</numberRecordsProcessed>
+ <numberRecordsFailed>0</numberRecordsFailed>
+ <totalProcessingTime>0</totalProcessingTime>
+ <apiActiveProcessingTime>0</apiActiveProcessingTime>
+ <apexProcessingTime>0</apexProcessingTime>
+</batchInfo>';
+    }
+
+    public function batchListXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?><batchInfoList xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+ <batchInfo>
+  <id>8914000000B5YcDAAV</id>
+  <jobId>750D00000004SkVIAU</jobId>
+  <state>NotProcessed</state>
+  <createdDate>2016-11-23T02:06:34.000Z</createdDate>
+  <systemModstamp>2016-11-23T02:06:34.000Z</systemModstamp>
+  <numberRecordsProcessed>0</numberRecordsProcessed>
+  <numberRecordsFailed>0</numberRecordsFailed>
+  <totalProcessingTime>0</totalProcessingTime>
+  <apiActiveProcessingTime>0</apiActiveProcessingTime>
+  <apexProcessingTime>0</apexProcessingTime>
+ </batchInfo>
+ <batchInfo>
+  <id>8914000000B5YcIAAV</id>
+  <jobId>750D00000004SkVIAU</jobId>
+  <state>Completed</state>
+  <createdDate>2016-11-23T02:06:34.000Z</createdDate>
+  <systemModstamp>2016-11-23T02:06:34.000Z</systemModstamp>
+  <numberRecordsProcessed>28</numberRecordsProcessed>
+  <numberRecordsFailed>0</numberRecordsFailed>
+  <totalProcessingTime>0</totalProcessingTime>
+  <apiActiveProcessingTime>0</apiActiveProcessingTime>
+  <apexProcessingTime>0</apexProcessingTime>
+ </batchInfo>
+</batchInfoList>';
+    }
+
+    public function dataQueryResultXml()
+    {
+        return '<result-list xmlns="http://www.force.com/2009/06/asyncapi/dataload"><result>752400000025Ws8</result></result-list>';
+    }
+
+    public function dataQueryDataResultCsv()
+    {
+        return '"Id","Name"
+"0014000001iM8r3AAC","Greatest Bank"
+"0014000001iM8S5AAK","Regions Insurance"';
     }
 }

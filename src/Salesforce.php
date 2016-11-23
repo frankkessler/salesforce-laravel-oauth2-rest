@@ -468,7 +468,7 @@ class Salesforce
 
             $format = 'json';
             if (isset($options['format'])) {
-                $format = $options['format'];
+                $format = strtolower($options['format']);
                 unset($options['format']);
             }
 

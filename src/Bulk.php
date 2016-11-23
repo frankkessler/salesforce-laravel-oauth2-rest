@@ -37,13 +37,14 @@ class Bulk extends Salesforce
         $batches = [];
 
         $defaults = [
-            'externalIdFieldName' => null,
-            'batchSize'           => 2000,
-            'batchTimeout'        => 600,
-            'contentType'         => 'JSON',
-            'pollIntervalSeconds' => 5,
-            'isBatchedResult'     => false,
-            'concurrencyMode'     => 'Parallel',
+            'externalIdFieldName'       => null,
+            'batchSize'                 => 2000,
+            'batchTimeout'              => 600,
+            'contentType'               => 'JSON',
+            'pollIntervalSeconds'       => 5,
+            'isBatchedResult'           => false,
+            'concurrencyMode'           => 'Parallel',
+            'Sforce-Enable-PKChunking'  => false,
         ];
 
         $options = array_replace($defaults, $options);
@@ -52,7 +53,7 @@ class Bulk extends Salesforce
             $options['isBatchedResult'] = true;
         }
 
-        $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType'], $options['concurrencyMode']);
+        $job = $this->createJob($operation, $objectType, $options['externalIdFieldName'], $options['contentType'], $options['concurrencyMode'], $options);
 
         if ($job->id) {
             //if data is array, we can split it into batches
@@ -62,7 +63,7 @@ class Bulk extends Salesforce
                 for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
                     $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
                 }
-            } else { //probably a string query so run in onee batch
+            } else { //probably a string query so run in one batch
                 $batches[] = $this->addBatch($job->id, $data);
             }
         } else {
@@ -71,6 +72,10 @@ class Bulk extends Salesforce
 
         $time = time();
         $timeout = $time + $options['batchTimeout'];
+
+        if($options['Sforce-Enable-PKChunking']){
+            $batches = $this->allBatchDetails($job->id, $options['contentType']);
+        }
 
         $batches_finished = [];
 
@@ -82,10 +87,13 @@ class Bulk extends Salesforce
                     continue;
                 }
 
-                $batch = $this->batchDetails($job->id, $batch->id);
-                if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed'])) {
-                    $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult']);
-                    $batch->records = $batchResult->records;
+                $batch = $this->batchDetails($job->id, $batch->id, $options['contentType']);
+                if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed', 'NotProcessed'])) {
+
+                    if(in_array($batch->state, ['Completed'])) {
+                        $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult'], null, $options['contentType']);
+                        $batch->records = $batchResult->records;
+                    }
                     $batches_finished[] = $batch->id;
                 }
             }
@@ -118,7 +126,7 @@ class Bulk extends Salesforce
      *
      * @return BulkJobResponse
      */
-    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode = 'Parallel')
+    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode = 'Parallel', $options=[])
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
 
@@ -128,6 +136,12 @@ class Bulk extends Salesforce
             'concurrencyMode' => $concurrencyMode,
         ];
 
+        $headers = [];
+
+        if(isset($options['Sforce-Enable-PKChunking']) && $options['Sforce-Enable-PKChunking']){
+            $headers['Sforce-Enable-PKChunking'] = $this->parsePkChunkingHeader($options['Sforce-Enable-PKChunking']);
+        }
+
         //order of variables matters so this externalIdFieldName has to come before contentType
         if ($operation == 'upsert') {
             $json_array['externalIdFieldName'] = $externalIdFieldName;
@@ -136,7 +150,8 @@ class Bulk extends Salesforce
         $json_array['contentType'] = $contentType;
 
         $result = $this->call_api('post', $url, [
-            'json' => $json_array,
+            'json'    => $json_array,
+            'headers' => $headers,
         ]);
 
         if ($result && is_array($result)) {
@@ -146,11 +161,14 @@ class Bulk extends Salesforce
         return new BulkJobResponse();
     }
 
-    public function jobDetails($jobId)
+    public function jobDetails($jobId, $format='json')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
 
-        $result = $this->call_api('get', $url);
+        $result = $this->call_api('get', $url,
+            [
+                'format'  => $this->batchResponseFormatFromContentType($format),
+            ]);
 
         if ($result && is_array($result)) {
             return new BulkJobResponse($result);
@@ -191,7 +209,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBatch($jobId, $data)
+    public function addBatch($jobId, $data, $format='json')
     {
         if (!$jobId) {
             //throw exception
@@ -214,6 +232,7 @@ class Bulk extends Salesforce
         $result = $this->call_api('post', $url, [
             'body'    => $body,
             'headers' => $headers,
+            'format'  => $this->batchResponseFormatFromContentType($format),
         ]);
 
         if ($result && is_array($result)) {
@@ -226,6 +245,7 @@ class Bulk extends Salesforce
     /**
      * @param $jobId
      * @param $batchId
+     * @param $format
      *
      * @return BulkBatchResponse
      */
@@ -234,7 +254,7 @@ class Bulk extends Salesforce
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId;
 
         $result = $this->call_api('get', $url, [
-            'format' => $format,
+            'format'  => $this->batchResponseFormatFromContentType($format),
         ]);
 
         if ($result && is_array($result)) {
@@ -244,6 +264,37 @@ class Bulk extends Salesforce
         }
 
         return new BulkBatchResponse();
+    }
+
+    /**
+     * @param $jobId
+     * @param $format
+     *
+     * @return BulkBatchResponse[]
+     */
+    public function allBatchDetails($jobId, $format = 'json')
+    {
+        $batches = [];
+
+        //TODO:  Fix hack to give initial Salesforce batch time to split into many batches by PK
+        sleep(10);
+        ////////////////////////////////////////////////////////////////////////////////////////
+
+        $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch';
+
+        $result = $this->call_api('get', $url, [
+            'format'  => $this->batchResponseFormatFromContentType($format),
+        ]);
+
+        if ($result && is_array($result) && isset($result['batchInfo']) && !isset($result['batchInfo']['id'])) {
+            foreach($result['batchInfo'] as $batch) {
+                $batches[] = new BulkBatchResponse($batch);
+            }
+        } else {
+            //throw exception
+        }
+
+        return $batches;
     }
 
     /**
@@ -261,20 +312,30 @@ class Bulk extends Salesforce
 
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId.'/batch/'.$batchId.'/result';
 
+        $resultPostArray = [];
+
         //if this is a query result, the main result page will have an array of result ids to follow for hte query results
         if ($resultId) {
             $url = $url.'/'.$resultId;
+            $resultPostArray['format'] = $format;
+        }else{
+            $resultPostArray['format'] = $this->batchResponseFormatFromContentType($format);
         }
 
-        $result = $this->call_api('get', $url, [
-            'format' => $format,
-        ]);
+        $result = $this->call_api('get', $url, $resultPostArray);
 
         if ($result && is_array($result)) {
 
             //initialize array for records to be used later
             if (!isset($result['records']) || !is_array($result['records'])) {
                 $result['records'] = [];
+            }
+
+            if(isset($result['result'])){
+                if(!is_array($result['result'])){
+                    $result['result'] = [$result['result']];
+                }
+                $result = array_merge($result, $result['result']);
             }
 
             //maximum amount of batch records allowed is 10,000
@@ -286,7 +347,7 @@ class Bulk extends Salesforce
 
                 //batched results return a list of result ids that need to be processed to get the actual data
                 if ($isBatchedResult) {
-                    $batchResult = $this->batchResult($jobId, $batchId, false, $result[$i]);
+                    $batchResult = $this->batchResult($jobId, $batchId, false, $result[$i], $format);
                     $result['records'] = array_merge($result['records'], $batchResult->records);
                 } else {
                     //fix boolean values from appearing as
@@ -437,13 +498,6 @@ class Bulk extends Salesforce
         return new BulkBatchResponse();
     }
 
-   /* public function binaryBatchResult($jobId, $batchId, $isBatchedResult = false, $resultId = null, $format='json')
-    {
-        $result = $this->batchResult($jobId, $batchId, $isBatchedResult, $resultId, $format);
-
-        if($result->state)
-    }
-*/
     protected function batchResponseFormatFromContentType($contentType)
     {
         switch (strtoupper($contentType)) {
@@ -451,6 +505,8 @@ class Bulk extends Salesforce
             case 'ZIP/CSV':
             case 'ZIP_XML':
             case 'ZIP/XML':
+            case 'CSV':
+            case 'XML':
                 $return = 'xml';
                 break;
             default:
@@ -459,5 +515,20 @@ class Bulk extends Salesforce
         }
 
         return $return;
+    }
+
+    protected function parsePkChunkingHeader($pk_chunk_header)
+    {
+        if(is_array($pk_chunk_header)){
+            $header_parts = [];
+            foreach($pk_chunk_header as $key=>$value) {
+                $header_parts[] = $key.'='.$value;
+            }
+
+            return implode('; ',$header_parts);
+        }elseif(in_array($pk_chunk_header, [true,'true','TRUE'])){
+            return 'TRUE';
+        }
+        return 'FALSE';
     }
 }

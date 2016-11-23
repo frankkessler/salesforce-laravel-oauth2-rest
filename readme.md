@@ -356,6 +356,30 @@ if ($result->id) {
 }
 ```
 
+### Query with PK Chunking
+
+```php
+$operationType = 'query';
+$objectType = 'Account';
+$objectData = 'SELECT Id, Name FROM Account';
+
+$result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData, [
+    'contentType' => 'CSV',
+    'Sforce-Enable-PKChunking' => [
+        'chunkSize' => 2500,
+    ],
+]);
+
+if ($result->id) {
+    $id = $result->id;
+    foreach ($result->batches as $batch) {
+        foreach ($batch->records as $record) {
+            $account_id = $record['Id'];
+        }
+    }
+}
+```
+
 ### Custom REST Endpoint (GET)
 
 ```php
