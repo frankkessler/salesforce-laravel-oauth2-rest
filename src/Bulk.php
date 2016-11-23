@@ -320,7 +320,7 @@ class Bulk extends Salesforce
             $resultPostArray['format'] = $format;
             //all results that have a $resultId should be returned without lowercase formatting
             $resultPostArray['lowerCaseHeaders'] = false;
-        }else{
+        } else {
             //result object returned in xml if selecting csv as contentType
             $resultPostArray['format'] = $this->batchResponseFormatFromContentType($format);
         }
