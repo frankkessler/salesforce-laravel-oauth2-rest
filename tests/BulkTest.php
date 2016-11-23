@@ -209,7 +209,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             new Response(200, [], $this->batchXml()),
             new Response(200, [], $this->batchListXml()),
             new Response(200, [], $this->batchXml('NotProcessed')),
-            new Response(200, [], $this->batchXml('Completed','8914000000B5YcIAAV','89040000006iLsVAAU')),
+            new Response(200, [], $this->batchXml('Completed', '8914000000B5YcIAAV', '89040000006iLsVAAU')),
             new Response(200, [], $this->dataQueryResultXml()),
             new Response(200, [], $this->dataQueryDataResultCsv()),
             new Response(200, [], json_encode($this->jobArray())),
@@ -232,7 +232,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $query = "SELECT Id, Name FROM Account WHERE RecordTypeId='xxxxxxxxxxxxxx'";
 
         $job = $salesforce->bulk()->runBatch($operation, $objectType, $query, [
-            'contentType' => 'CSV',
+            'contentType'              => 'CSV',
             'Sforce-Enable-PKChunking' => [
                 'chunkSize' => 2500,
             ],
@@ -240,10 +240,10 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         $this->assertEquals($jobId, $job->id);
 
-        $i=0;
+        $i = 0;
         foreach ($job->batches as $batch) {
             //second batch is the one with data
-            if($i==0){
+            if ($i == 0) {
                 $i++;
                 continue;
             }
@@ -476,7 +476,7 @@ true,true,001xx000003DHP1AAO,';
         ]';
     }
 
-    public function batchXml($state='Queued', $batchId='89040000006iLsVAAU', $jobId='750D00000004SkVIAU')
+    public function batchXml($state = 'Queued', $batchId = '89040000006iLsVAAU', $jobId = '750D00000004SkVIAU')
     {
         return '<?xml version="1.0" encoding="UTF-8"?><batchInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
  <id>'.$batchId.'</id>
