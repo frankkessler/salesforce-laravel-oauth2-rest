@@ -73,7 +73,7 @@ class Bulk extends Salesforce
         $time = time();
         $timeout = $time + $options['batchTimeout'];
 
-        if($options['Sforce-Enable-PKChunking']){
+        if ($options['Sforce-Enable-PKChunking']) {
             $batches = $this->allBatchDetails($job->id, $options['contentType']);
         }
 
@@ -89,8 +89,7 @@ class Bulk extends Salesforce
 
                 $batch = $this->batchDetails($job->id, $batch->id, $options['contentType']);
                 if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed', 'NotProcessed'])) {
-
-                    if(in_array($batch->state, ['Completed'])) {
+                    if (in_array($batch->state, ['Completed'])) {
                         $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult'], null, $options['contentType']);
                         $batch->records = $batchResult->records;
                     }
@@ -126,7 +125,7 @@ class Bulk extends Salesforce
      *
      * @return BulkJobResponse
      */
-    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode = 'Parallel', $options=[])
+    public function createJob($operation, $objectType, $externalIdFieldName = null, $contentType = 'JSON', $concurrencyMode = 'Parallel', $options = [])
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job';
 
@@ -138,7 +137,7 @@ class Bulk extends Salesforce
 
         $headers = [];
 
-        if(isset($options['Sforce-Enable-PKChunking']) && $options['Sforce-Enable-PKChunking']){
+        if (isset($options['Sforce-Enable-PKChunking']) && $options['Sforce-Enable-PKChunking']) {
             $headers['Sforce-Enable-PKChunking'] = $this->parsePkChunkingHeader($options['Sforce-Enable-PKChunking']);
         }
 
@@ -161,7 +160,7 @@ class Bulk extends Salesforce
         return new BulkJobResponse();
     }
 
-    public function jobDetails($jobId, $format='json')
+    public function jobDetails($jobId, $format = 'json')
     {
         $url = '/services/async/'.SalesforceConfig::get('salesforce.api.version').'/job/'.$jobId;
 
@@ -209,7 +208,7 @@ class Bulk extends Salesforce
      *
      * @return BulkBatchResponse
      */
-    public function addBatch($jobId, $data, $format='json')
+    public function addBatch($jobId, $data, $format = 'json')
     {
         if (!$jobId) {
             //throw exception
@@ -287,7 +286,7 @@ class Bulk extends Salesforce
         ]);
 
         if ($result && is_array($result) && isset($result['batchInfo']) && !isset($result['batchInfo']['id'])) {
-            foreach($result['batchInfo'] as $batch) {
+            foreach ($result['batchInfo'] as $batch) {
                 $batches[] = new BulkBatchResponse($batch);
             }
         } else {
@@ -318,7 +317,7 @@ class Bulk extends Salesforce
         if ($resultId) {
             $url = $url.'/'.$resultId;
             $resultPostArray['format'] = $format;
-        }else{
+        } else {
             $resultPostArray['format'] = $this->batchResponseFormatFromContentType($format);
         }
 
@@ -331,8 +330,8 @@ class Bulk extends Salesforce
                 $result['records'] = [];
             }
 
-            if(isset($result['result'])){
-                if(!is_array($result['result'])){
+            if (isset($result['result'])) {
+                if (!is_array($result['result'])) {
                     $result['result'] = [$result['result']];
                 }
                 $result = array_merge($result, $result['result']);
@@ -519,16 +518,17 @@ class Bulk extends Salesforce
 
     protected function parsePkChunkingHeader($pk_chunk_header)
     {
-        if(is_array($pk_chunk_header)){
+        if (is_array($pk_chunk_header)) {
             $header_parts = [];
-            foreach($pk_chunk_header as $key=>$value) {
+            foreach ($pk_chunk_header as $key => $value) {
                 $header_parts[] = $key.'='.$value;
             }
 
-            return implode('; ',$header_parts);
-        }elseif(in_array($pk_chunk_header, [true,'true','TRUE'])){
+            return implode('; ', $header_parts);
+        } elseif (in_array($pk_chunk_header, [true, 'true', 'TRUE'])) {
             return 'TRUE';
         }
+
         return 'FALSE';
     }
 }
