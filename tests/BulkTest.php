@@ -249,7 +249,7 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             }
             $this->assertEquals($batchId, $batch->id);
             foreach ($batch->records as $record) {
-                $this->assertEquals($firstAccountId, $record['id']);
+                $this->assertEquals($firstAccountId, $record['Id']);
                 break;
             }
         }

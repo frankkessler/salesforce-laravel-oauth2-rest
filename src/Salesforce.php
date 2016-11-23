@@ -472,6 +472,13 @@ class Salesforce
                 unset($options['format']);
             }
 
+            //required so csv return matches json return when creating new records
+            $lowerCaseHeaders = true;
+            if (isset($options['lowerCaseHeaders'])) {
+                $lowerCaseHeaders = $options['lowerCaseHeaders'];
+                unset($options['lowerCaseHeaders']);
+            }
+
             $response = $this->oauth2Client->{$method}($url, $options);
 
             /* @var $response \GuzzleHttp\Psr7\Response */
@@ -494,7 +501,7 @@ class Salesforce
                 $json = json_encode($xml);
                 $response_array = json_decode($json, true);
             } elseif ($format == 'csv') {
-                $response_array = csvToArray((string) $response->getBody(), $lowerCaseHeaders = true);
+                $response_array = csvToArray((string) $response->getBody(), $lowerCaseHeaders);
             } else {
                 $response_array = json_decode((string) $response->getBody(), true);
             }

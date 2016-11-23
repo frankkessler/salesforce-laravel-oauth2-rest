@@ -317,8 +317,12 @@ class Bulk extends Salesforce
         //if this is a query result, the main result page will have an array of result ids to follow for hte query results
         if ($resultId) {
             $url = $url.'/'.$resultId;
+            //results returned in contentType supplied by the creation of the job
             $resultPostArray['format'] = $format;
+            //all results that have a $resultId should be returned without lowercase formatting
+            $resultPostArray['lowerCaseHeaders'] = false;
         }else{
+            //result object returned in xml if selecting csv as contentType
             $resultPostArray['format'] = $this->batchResponseFormatFromContentType($format);
         }
 
