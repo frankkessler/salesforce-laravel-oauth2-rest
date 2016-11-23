@@ -3,9 +3,6 @@
 [![StyleCI](https://styleci.io/repos/42465034/shield)](https://styleci.io/repos/42465034)
 [![Latest Stable Version](https://img.shields.io/packagist/v/frankkessler/salesforce-laravel-oauth2-rest.svg)](https://packagist.org/packages/frankkessler/salesforce-laravel-oauth2-rest)
 
-# API CHANGES
-There are major breaking changes between the 0.3 branch and the 0.4 branch.  Keep in mind that this package IS NOT yet stable.
-
 # RUNNING UNIT TESTS
 
 There are currently two ways to run the unit tests.  Keep in mind that node is a dependency for running the unit tests regardless of which way you want to run them.
