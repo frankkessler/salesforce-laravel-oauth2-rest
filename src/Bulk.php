@@ -501,7 +501,7 @@ class Bulk extends Salesforce
         return new BulkBatchResponse();
     }
 
-    protected function batchResponseFormatFromContentType($contentType)
+    public function batchResponseFormatFromContentType($contentType)
     {
         switch (strtoupper($contentType)) {
             case 'ZIP_CSV':
@@ -520,7 +520,7 @@ class Bulk extends Salesforce
         return $return;
     }
 
-    protected function parsePkChunkingHeader($pk_chunk_header)
+    public function parsePkChunkingHeader($pk_chunk_header)
     {
         if (is_array($pk_chunk_header)) {
             $header_parts = [];
