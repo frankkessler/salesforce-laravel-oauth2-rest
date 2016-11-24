@@ -93,7 +93,7 @@ class Bulk extends Salesforce
                 if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed', 'NotProcessed'])) {
                     if (in_array($batch->state, ['Completed'])) {
                         $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult'], null, $options['contentType']);
-                        if($options['batchProcessor'] instanceof BulkBatchProcessorInterface){
+                        if(class_exists($options['batchProcessor']) && class_implements($options['batchProcessor'], '\Frankkessler\Salesforce\Interfaces\BulkBatchProcessorInterface')){
                             call_user_func([$options['batchProcessor'], 'process'], $batchResult);
                         }else {
                             $batch->records = $batchResult->records;

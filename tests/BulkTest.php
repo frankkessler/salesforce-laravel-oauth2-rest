@@ -293,6 +293,8 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
             'batchProcessor'           => BulkBatchProcessor::class,
         ]);
 
+        $this->assertEquals(2, count(BulkBatchProcessor::$records));
+
         foreach(BulkBatchProcessor::$records as $record){
             $this->assertEquals($firstAccountId, $record['Id']);
             break;

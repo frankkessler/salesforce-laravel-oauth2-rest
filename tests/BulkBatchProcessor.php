@@ -9,6 +9,6 @@ class BulkBatchProcessor implements BulkBatchProcessorInterface
 
     public static function process(BulkBatchResultResponse $batchResult)
     {
-        array_merge(static::$records, $batchResult->records);
+        static::$records = array_merge(static::$records, $batchResult->records);
     }
 }
