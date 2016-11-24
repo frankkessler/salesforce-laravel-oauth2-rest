@@ -255,6 +255,50 @@ class BulkTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         }
     }
 
+    public function testRunPkChunkQueryBatchWithBatchProcessor()
+    {
+        // Create a mock and queue two responses.
+        $mock = new MockHandler([
+            new Response(200, [], json_encode($this->jobArray())),
+            new Response(200, [], $this->batchXml()),
+            new Response(200, [], $this->batchListXml()),
+            new Response(200, [], $this->batchXml('NotProcessed')),
+            new Response(200, [], $this->batchXml('Completed', '8914000000B5YcIAAV', '89040000006iLsVAAU')),
+            new Response(200, [], $this->dataQueryResultXml()),
+            new Response(200, [], $this->dataQueryDataResultCsv()),
+            new Response(200, [], json_encode($this->jobArray())),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+
+        $salesforce = new \Frankkessler\Salesforce\Salesforce([
+            'handler'                        => $handler,
+            'salesforce.oauth.access_token'  => 'TEST',
+            'salesforce.oauth.refresh_token' => 'TEST',
+        ]);
+
+        $jobId = '750D00000004SkVIAU';
+        $batchId = '8914000000B5YcIAAV';
+        $firstAccountId = '0014000001iM8r3AAC';
+
+        $operation = 'query';
+        $objectType = 'Account';
+        $query = "SELECT Id, Name FROM Account WHERE RecordTypeId='xxxxxxxxxxxxxx'";
+
+        $job = $salesforce->bulk()->runBatch($operation, $objectType, $query, [
+            'contentType'              => 'CSV',
+            'Sforce-Enable-PKChunking' => [
+                'chunkSize' => 2500,
+            ],
+            'batchProcessor'           => BulkBatchProcessor::class,
+        ]);
+
+        foreach(BulkBatchProcessor::$records as $record){
+            $this->assertEquals($firstAccountId, $record['Id']);
+            break;
+        }
+    }
+
     public function testBulkBinaryJobCreateWithMiddleware()
     {
         copy(realpath('./tests/bulk_zip_files').'/zipped_dir.zip', realpath('./build').'/test.zip');

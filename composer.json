@@ -35,7 +35,8 @@
   },
   "autoload-dev": {
     "files": [
-      "tests/GuzzleServer.php"
+      "tests/GuzzleServer.php",
+      "tests/BulkBatchProcessor.php"
     ]
   }
 }

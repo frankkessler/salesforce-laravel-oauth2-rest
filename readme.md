@@ -377,6 +377,22 @@ if ($result->id) {
 }
 ```
 
+### Query with Class to Process each Batch
+
+```php
+$operationType = 'query';
+$objectType = 'Account';
+$objectData = 'SELECT Id, Name FROM Account LIMIT 10';
+
+$result = Salesforce::bulk()->runBatch($operationType, $objectType, $objectData,[
+    'batchProcessor' => CustomBulkBatchProcessor::class, //Class must implement Frankkessler\Salesforce\Interfaces\BulkBatchProcessorInterface
+]);
+
+if ($result->id) {
+    $id = $result->id;
+}
+```
+
 ### Custom REST Endpoint (GET)
 
 ```php
