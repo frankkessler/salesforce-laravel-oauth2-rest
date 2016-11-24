@@ -4,7 +4,6 @@ namespace Frankkessler\Salesforce;
 
 use Frankkessler\Salesforce\Client\BulkClient;
 use Frankkessler\Salesforce\DataObjects\BinaryBatch;
-use Frankkessler\Salesforce\Interfaces\BulkBatchProcessorInterface;
 use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResponse;
 use Frankkessler\Salesforce\Responses\Bulk\BulkBatchResultResponse;
 use Frankkessler\Salesforce\Responses\Bulk\BulkJobResponse;
@@ -46,7 +45,7 @@ class Bulk extends Salesforce
             'isBatchedResult'           => false,
             'concurrencyMode'           => 'Parallel',
             'Sforce-Enable-PKChunking'  => false,
-            'batchProcessor'    => null,
+            'batchProcessor'            => null,
         ];
 
         $options = array_replace($defaults, $options);
@@ -93,9 +92,9 @@ class Bulk extends Salesforce
                 if (in_array($batch->state, ['Completed', 'Failed', 'Not Processed', 'NotProcessed'])) {
                     if (in_array($batch->state, ['Completed'])) {
                         $batchResult = $this->batchResult($job->id, $batch->id, $options['isBatchedResult'], null, $options['contentType']);
-                        if(class_exists($options['batchProcessor']) && class_implements($options['batchProcessor'], '\Frankkessler\Salesforce\Interfaces\BulkBatchProcessorInterface')){
+                        if (class_exists($options['batchProcessor']) && class_implements($options['batchProcessor'], '\Frankkessler\Salesforce\Interfaces\BulkBatchProcessorInterface')) {
                             call_user_func([$options['batchProcessor'], 'process'], $batchResult);
-                        }else {
+                        } else {
                             $batch->records = $batchResult->records;
                         }
                     }
