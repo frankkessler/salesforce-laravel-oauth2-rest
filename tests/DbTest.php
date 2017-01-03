@@ -54,7 +54,6 @@ class DbTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertEquals($data['instance_url'], $tokenRecord->instance_base_url);
         $this->assertEquals($user_id, $tokenRecord->user_id);
 
-
         $newAccessTokenString = 'TEST_TOKEN_NEW';
         $newRefreshTokenString = 'TEST_REFRESH_TOKEN_NEW';
         $repository->setAccessToken($newAccessTokenString, $user_id);
