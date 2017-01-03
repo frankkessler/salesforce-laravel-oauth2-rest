@@ -132,8 +132,6 @@ class Salesforce
     {
         $result = $this->sobject()->get($id, $type);
 
-
-
         $array_result = array_replace($result->toArray(), json_decode(json_encode($result->sobject), true));
 
         if ($result->error->isValid()) {
@@ -562,7 +560,6 @@ class Salesforce
 
                 $this->log('error', 'Salesforce - '.json_encode($data));
             }
-
 
             if (isset($data) && $data) {
                 $this->updateAccessToken($this->oauth2Client->getAccessToken()->getToken());
