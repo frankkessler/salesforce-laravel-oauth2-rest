@@ -61,9 +61,9 @@ class Bulk extends Salesforce
             //if data is array, we can split it into batches
             if (is_array($data)) {
                 $totalNumberOfBatches = ceil(count($data) / $options['batchSize']);
-
+                $this->log('info', 'Job Record Count: '.count($data).' Number of Batches: '.$totalNumberOfBatches);
                 for ($i = 1; $i <= $totalNumberOfBatches; $i++) {
-                    $batches[] = $this->addBatch($job->id, array_splice($data, ($i - 1) * $options['batchSize'], $options['batchSize']));
+                    $batches[] = $this->addBatch($job->id, array_splice($data, 0, $options['batchSize']));
                 }
             } else { //probably a string query so run in one batch
                 $batches[] = $this->addBatch($job->id, $data);
