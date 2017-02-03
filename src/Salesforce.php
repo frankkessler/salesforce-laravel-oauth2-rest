@@ -595,7 +595,7 @@ class Salesforce
 
     protected function updateAccessToken($current_access_token)
     {
-        if ($current_access_token != SalesforceConfig::get('salesforce.oauth.access_token')) {
+        if ($current_access_token != SalesforceConfig::get('salesforce.oauth.access_token') && SalesforceConfig::get('salesforce.oauth.auth_type') != 'jwt_web_token') {
             $this->repository->store->setAccessToken($current_access_token);
             SalesforceConfig::set('salesforce.oauth.access_token', $current_access_token);
         }
