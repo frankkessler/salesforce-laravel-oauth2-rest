@@ -26,7 +26,7 @@ vendor/bin/phpunit
 To install this package, add the following to your composer.json file
 
 ```json
-frankkessler/salesforce-laravel-oauth2-rest: "0.4.*"
+"frankkessler/salesforce-laravel-oauth2-rest": "0.4.*"
 ```
 
 ## LARAVEL 5 SPECIFIC INSTALLATION TASKS
