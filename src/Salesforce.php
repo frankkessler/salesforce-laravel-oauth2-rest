@@ -69,7 +69,7 @@ class Salesforce
     public function setupOauthClient()
     {
         //If access_token or refresh_token are NOT supplied through constructor, pull them from the repository
-        if (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token')) {
+        if (SalesforceConfig::get('salesforce.oauth.auth_type') != 'jwt_web_token' && (!SalesforceConfig::get('salesforce.oauth.access_token') || !SalesforceConfig::get('salesforce.oauth.refresh_token'))) {
             $token_record = $this->repository->store->getTokenRecord();
             SalesforceConfig::set('salesforce.oauth.access_token', $token_record->access_token);
             SalesforceConfig::set('salesforce.oauth.refresh_token', $token_record->refresh_token);
