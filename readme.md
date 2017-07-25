@@ -178,7 +178,7 @@ SALESFORCE_OAUTH_JWT_RUN_AS_USER_NAME="test.use@mycompanyname.com"  //This is th
 $objectType = 'Account';
 $objectId = 'OBJECT_ID';
 
-$result = Salesforce::sobject()->get($objectType, $objectId);
+$result = Salesforce::sobject()->get($objectId, $objectType);
 
 if($result->success){
     $name = $result->sobject['Name'];
@@ -211,7 +211,7 @@ $objectData = [
     'Description'   => 'Account Description',
 ];
 
-$result = Salesforce::sobject()->update($objectType, $objectId, $objectData);
+$result = Salesforce::sobject()->update($objectId, $objectType, $objectData);
 
 if($result->success){
     //no data returned
@@ -224,7 +224,7 @@ if($result->success){
 $objectType = 'Account';
 $objectId = 'OBJECT_ID';
 
-$result = Salesforce::sobject()->delete($objectType, $objectId);
+$result = Salesforce::sobject()->delete($objectId, $objectType);
 
 if($result->success){
     //no data returned
