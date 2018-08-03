@@ -43,8 +43,8 @@ class Salesforce
 
         $this->repository = new TokenRepository();
 
-        if (!empty($this->config_local["salesforce.logger"]) && is_string($this->config_local["salesforce.logger"])) {
-            $this->config_local["salesforce.logger"] = new $this->config_local["salesforce.logger"]("salesforce-rest");
+        if (!empty($this->config_local['salesforce.logger']) && is_string($this->config_local['salesforce.logger'])) {
+            $this->config_local['salesforce.logger'] = new $this->config_local['salesforce.logger']('salesforce-rest');
         }
 
         if (isset($this->config_local['base_uri'])) {
