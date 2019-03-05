@@ -10,10 +10,10 @@
     "php": ">=5.5.9",
     "guzzlehttp/guzzle":"~6.0",
     "frankkessler/guzzle-oauth2-middleware":"0.1.*",
-    "illuminate/http": "~5.1",
-    "illuminate/routing": "~5.1",
-    "illuminate/support": "~5.1",
-    "illuminate/database": "~5.1",
+    "illuminate/http": "5.7.*",
+    "illuminate/routing": "5.7.*",
+    "illuminate/support": "5.7.*",
+    "illuminate/database": "5.7.*",
     "psr/log": "~1.0"
   },
   "require-dev": {
