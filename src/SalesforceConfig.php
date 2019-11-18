@@ -3,6 +3,7 @@
 namespace Frankkessler\Salesforce;
 
 use Config;
+use Illuminate\Support\Arr;
 
 class SalesforceConfig
 {
@@ -58,7 +59,7 @@ class SalesforceConfig
         }
         $config = ['salesforce' => $config];
 
-        return array_dot($config);
+        return Arr::dot($config);
     }
 
     public static function reset()
